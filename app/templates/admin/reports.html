@@ -1,0 +1,140 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Отчёты{% endblock %}
+{% block page_title %}Отчёты{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Export Section -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-download me-2"></i>Экспорт данных
+            </div>
+            <div class="card-body">
+                <form id="export-form">
+                    <div class="mb-3">
+                        <label class="form-label">Период</label>
+                        <div class="row g-2">
+                            <div class="col">
+                                <input type="date" name="start_date" id="start_date" class="form-control"
+                                       value="{{ start_date }}">
+                            </div>
+                            <div class="col">
+                                <input type="date" name="end_date" id="end_date" class="form-control"
+                                       value="{{ end_date }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Тип отчёта</label>
+                        <div class="d-grid gap-2">
+                            <a href="#" onclick="exportReport('attendance', 'json')" class="btn btn-outline-primary">
+                                <i class="bi bi-filetype-json me-2"></i>Журнал посещений (JSON)
+                            </a>
+                            <a href="#" onclick="exportReport('attendance', 'excel')" class="btn btn-outline-success">
+                                <i class="bi bi-file-earmark-excel me-2"></i>Журнал посещений (Excel)
+                            </a>
+                            <a href="#" onclick="exportReport('stats', 'excel')" class="btn btn-outline-info">
+                                <i class="bi bi-bar-chart me-2"></i>Сводная статистика (Excel)
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-graph-up me-2"></i>Статистика за период</span>
+            </div>
+            <div class="card-body p-0">
+                {% if stats %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Сотрудник</th>
+                                <th class="text-center">Дней</th>
+                                <th class="text-center">Часов</th>
+                                <th class="text-center">Ср. приход</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in stats %}
+                            <tr>
+                                <td>{{ s.employee_name }}</td>
+                                <td class="text-center">{{ s.total_days }}</td>
+                                <td class="text-center">{{ "%.1f" | format(s.total_hours) }}</td>
+                                <td class="text-center">{{ s.avg_arrival_time or '—' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-bar-chart fs-1"></i>
+                    <p class="mt-2 mb-0">Выберите период для просмотра статистики</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Cards -->
+<div class="row g-4 mt-2">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <div class="stat-value text-primary">{{ total_entries }}</div>
+                <div class="stat-label">Всего входов за период</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <div class="stat-value text-success">{{ unique_employees }}</div>
+                <div class="stat-label">Уникальных сотрудников</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <div class="stat-value text-info">{{ avg_confidence }}%</div>
+                <div class="stat-label">Средняя уверенность</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportReport(type, format) {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+
+    if (!startDate || !endDate) {
+        alert('Выберите период для экспорта');
+        return;
+    }
+
+    let url;
+    if (type === 'attendance') {
+        url = `/api/v1/attendance/export/${format}?start_date=${startDate}&end_date=${endDate}`;
+    } else if (type === 'stats') {
+        url = `/api/v1/attendance/export/stats/excel?start_date=${startDate}&end_date=${endDate}`;
+    }
+
+    window.location.href = url;
+}
+</script>
+{% endblock %}
