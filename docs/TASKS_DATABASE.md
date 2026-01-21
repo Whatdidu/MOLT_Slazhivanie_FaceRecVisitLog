@@ -1,64 +1,76 @@
 # Задачи модуля Database & Backend (Ольга)
 
 **Ветка:** `feature/database`
+**Эпик:** [#53 EPIC-DB: Database & Employee Management Module](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/53)
 
 ## Статусы
 - [ ] Не начато
 - [x] Выполнено
 - [~] В процессе
 
+## Прогресс
+
+- **Фаза 1:** ✓ 3/4 завершено (75%)
+- **Фаза 2:** ✓ 4/4 завершено (100%)
+- **Фаза 3:** ✓ 4/4 завершено (100%)
+- **Фаза 4:** 0/4 завершено (0%)
+- **Фаза 5:** 0/4 завершено (0%)
+- **Фаза 6:** 1/4 завершено (25%)
+
+**Общий прогресс:** 12/24 задач (50%)
+
 ---
 
 ## Фаза 1: Инфраструктура БД
 
-- [ ] **TASK-DB-001**: Настроить подключение к PostgreSQL (`app/db/session.py`)
-- [ ] **TASK-DB-002**: Создать базовый класс для моделей (`app/db/base.py`)
-- [ ] **TASK-DB-003**: Настроить Alembic для миграций
+- [x] **TASK-DB-001**: Настроить подключение к PostgreSQL (`app/db/session.py`) - [#54](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/54)
+- [x] **TASK-DB-002**: Создать базовый класс для моделей (`app/db/base.py`) - [#55](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/55)
+- [x] **TASK-DB-003**: Настроить Alembic для миграций - [#56](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/56)
 - [ ] **TASK-DB-004**: Создать первую миграцию (init)
 
 ## Фаза 2: Модели данных
 
-- [ ] **TASK-DB-005**: Создать модель `Employee` (`app/db/models.py`)
+- [x] **TASK-DB-005**: Создать модель `Employee` (`app/db/models.py`) - [#57](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/57)
   - id, full_name, email, department, photo_path
   - created_at, updated_at, is_active
-- [ ] **TASK-DB-006**: Создать модель `Embedding`
+- [x] **TASK-DB-006**: Создать модель `Embedding` - [#58](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/58)
   - id, employee_id, vector (ARRAY), model_version
   - created_at
-- [ ] **TASK-DB-007**: Создать модель `AttendanceLog`
+- [x] **TASK-DB-007**: Создать модель `AttendanceLog` - [#59](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/59)
   - id, employee_id, timestamp, event_type
   - confidence, trace_id, photo_path
-- [ ] **TASK-DB-008**: Добавить индексы для оптимизации запросов
+- [x] **TASK-DB-008**: Добавить индексы для оптимизации запросов
 
 ## Фаза 3: CRUD API для сотрудников
 
-- [ ] **TASK-DB-009**: Создать Pydantic schemas (`app/modules/employees/schemas.py`)
+- [x] **TASK-DB-009**: Создать Pydantic schemas (`app/modules/employees/schemas.py`) - [#60](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/60)
   - EmployeeCreate, EmployeeUpdate, EmployeeResponse
-- [ ] **TASK-DB-010**: Реализовать CRUD операции (`app/modules/employees/crud.py`)
+- [x] **TASK-DB-010**: Реализовать CRUD операции (`app/modules/employees/crud.py`) - [#61](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/61)
   - create_employee, get_employee, update_employee, delete_employee
   - list_employees (с пагинацией)
-- [ ] **TASK-DB-011**: Создать FastAPI router (`app/modules/employees/router.py`)
-- [ ] **TASK-DB-012**: Добавить валидацию данных и обработку ошибок
+- [x] **TASK-DB-011**: Создать FastAPI router (`app/modules/employees/router.py`) - [#62](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/62)
+- [x] **TASK-DB-012**: Добавить валидацию данных и обработку ошибок
 
 ## Фаза 4: Enrollment (регистрация сотрудников)
 
-- [ ] **TASK-DB-013**: Реализовать сервис регистрации (`app/modules/employees/service.py`)
-- [ ] **TASK-DB-014**: Интегрировать с модулем Recognition для создания эмбеддингов
+- [ ] **TASK-DB-013**: Реализовать сервис регистрации (`app/modules/employees/service.py`) - [#63](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/63)
+- [ ] **TASK-DB-014**: Интегрировать с модулем Recognition для создания эмбеддингов - [#64](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/64)
 - [ ] **TASK-DB-015**: Реализовать сохранение фото во временное хранилище
-- [ ] **TASK-DB-016**: Добавить endpoint для загрузки фото (`POST /api/v1/employees/enroll`)
+- [ ] **TASK-DB-016**: Добавить endpoint для загрузки фото (`POST /api/v1/employees/enroll`) - [#65](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/65)
 
 ## Фаза 5: Управление хранилищем
 
-- [ ] **TASK-DB-017**: Создать утилиту для управления TTL (`app/core/storage.py`)
-- [ ] **TASK-DB-018**: Реализовать автоудаление старых снапшотов (7 дней)
+- [ ] **TASK-DB-017**: Создать утилиту для управления TTL (`app/core/storage.py`) - [#66](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/66)
+- [ ] **TASK-DB-018**: Реализовать автоудаление старых снапшотов (7 дней) - [#67](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/67)
 - [ ] **TASK-DB-019**: Добавить фоновую задачу для очистки (или cron)
 - [ ] **TASK-DB-020**: Настроить структуру папок в `/static/debug_photos`
 
 ## Фаза 6: Тесты и документация
 
-- [ ] **TASK-DB-021**: Написать unit-тесты для CRUD операций
-- [ ] **TASK-DB-022**: Написать тесты для Enrollment flow
+- [ ] **TASK-DB-021**: Написать unit-тесты для CRUD операций - [#68](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/68)
+- [ ] **TASK-DB-022**: Написать тесты для Enrollment flow - [#69](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/69)
 - [ ] **TASK-DB-023**: Создать тестовые данные (fixtures)
-- [ ] **TASK-DB-024**: Документация API (OpenAPI/Swagger)
+- [x] **TASK-DB-024**: Документация API (OpenAPI/Swagger) - автогенерируется FastAPI
 
 ---
 
