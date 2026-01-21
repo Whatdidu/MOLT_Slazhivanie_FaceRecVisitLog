@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sputnik_faceid_db
+    environment:
+      POSTGRES_USER: sputnik_user
+      POSTGRES_PASSWORD: sputnik_pass
+      POSTGRES_DB: sputnik_faceid
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sputnik_user -d sputnik_faceid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sputnik_network
+
+  # FastAPI Application
+  app:
+    build: .
+    container_name: sputnik_faceid_app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://sputnik_user:sputnik_pass@postgres:5432/sputnik_faceid
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: sputnik_user
+      DB_PASSWORD: sputnik_pass
+      DB_NAME: sputnik_faceid
+      DEBUG: "True"
+      LOG_LEVEL: INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+      - ./static:/app/static
+    networks:
+      - sputnik_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  sputnik_network:
+    driver: bridge
