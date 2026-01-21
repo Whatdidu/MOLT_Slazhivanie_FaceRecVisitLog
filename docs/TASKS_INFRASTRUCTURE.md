@@ -44,6 +44,20 @@
 - [x] **TASK-INF-019**: Настроить обработку ошибок и exception handlers
 - [x] **TASK-INF-020**: Создать `requirements.txt` с зависимостями проекта
 
+## Фаза 6: Интеграция с другими модулями
+
+- [ ] **TASK-INF-021**: Интегрировать роутер модуля Recognition (после готовности Мансура)
+- [ ] **TASK-INF-022**: Интегрировать роутер модуля Employees (после готовности Ольги)
+- [ ] **TASK-INF-023**: Интегрировать роутер модуля Attendance (после готовности Лили)
+- [ ] **TASK-INF-024**: Настроить pipeline: Gateway → Recognition → Attendance
+
+## Фаза 7: Деплой и мониторинг
+
+- [ ] **TASK-INF-025**: Настроить деплой на VPS сервер
+- [ ] **TASK-INF-026**: Настроить nginx reverse proxy (опционально)
+- [ ] **TASK-INF-027**: Добавить мониторинг логов
+- [ ] **TASK-INF-028**: Провести нагрузочное тестирование
+
 ---
 
 ## Внутренний API (контракт для других модулей)
@@ -54,6 +68,7 @@
 from app.core.config import settings      # Доступ к настройкам
 from app.core.logger import get_logger    # Получение логгера
 from app.core.constants import *          # Константы проекта
+from app.core.exceptions import AppException  # Базовое исключение
 ```
 
 ### Trace ID Middleware
@@ -61,7 +76,17 @@ from app.core.constants import *          # Константы проекта
 ```python
 # Каждый запрос получает уникальный trace_id
 # Доступен через request.state.trace_id
+# Добавляется в заголовок ответа X-Trace-ID
 # Используется для логирования и отладки
+```
+
+### Gateway Service
+
+```python
+# POST /api/v1/gateway/snapshot
+# Принимает: UploadFile (image/jpeg, image/png, image/webp)
+# Возвращает: SnapshotResponse с trace_id и статусом
+# Валидация: размер до 10MB, минимум 100x100px
 ```
 
 ---
@@ -86,16 +111,20 @@ app/
 │   ├── __init__.py
 │   └── gateway.py             # Gateway router (прием изображений)
 ├── core/
-│   ├── __init__.py
+│   ├── __init__.py            # Экспорты модуля
 │   ├── config.py              # Pydantic Settings (загрузка .env)
 │   ├── logger.py              # Настройка логирования
 │   ├── constants.py           # Константы (TTL, пороги, пути)
 │   ├── middleware.py          # Trace ID middleware
 │   └── exceptions.py          # Кастомные исключения и handlers
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
-└── .env.example
+```
+
+```text
+# Корень проекта
+├── docker-compose.yml         # Оркестрация App + PostgreSQL
+├── Dockerfile                 # Multi-stage сборка образа
+├── requirements.txt           # Зависимости Python
+└── .env.example               # Пример переменных окружения
 ```
 
 ---
@@ -113,13 +142,13 @@ HOST=0.0.0.0
 PORT=8000
 
 # Database
-DATABASE_URL=postgresql://user:password@db:5432/sputnik_faceid
+DATABASE_URL=postgresql://sputnik:sputnik_password@db:5432/sputnik_faceid
 
 # Logging
 LOG_LEVEL=INFO
 
 # Storage
-STATIC_PATH=/app/static
+STATIC_PATH=app/static
 DEBUG_PHOTOS_TTL_DAYS=7
 
 # Recognition thresholds
@@ -129,17 +158,42 @@ RECOGNITION_LOW_CONFIDENCE_THRESHOLD=0.40
 
 ---
 
-## Зависимости
+## Зависимости (requirements.txt)
 
 ```txt
+# Web Framework
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
+
+# Configuration
 python-dotenv>=1.0.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
+
+# File uploads
 python-multipart>=0.0.6
+
+# Database
 sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.9
 alembic>=1.12.0
+
+# HTTP Client
 httpx>=0.25.0
 ```
+
+---
+
+## Прогресс выполнения
+
+| Фаза | Статус | Задачи |
+|------|--------|--------|
+| Фаза 1: Базовая структура | ✅ Выполнено | 4/4 |
+| Фаза 2: FastAPI каркас | ✅ Выполнено | 4/4 |
+| Фаза 3: Image Gateway | ✅ Выполнено | 4/4 |
+| Фаза 4: Docker | ✅ Выполнено | 4/4 |
+| Фаза 5: Утилиты | ✅ Выполнено | 4/4 |
+| Фаза 6: Интеграция | ⏳ Ожидание | 0/4 |
+| Фаза 7: Деплой | ⏳ Ожидание | 0/4 |
+
+**Общий прогресс: 20/28 задач (71%)**
