@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # FastAPI приложение
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: sputnik-faceid-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - APP_NAME=${APP_NAME:-SputnikFaceID}
+      - APP_VERSION=${APP_VERSION:-0.1.0}
+      - DEBUG=${DEBUG:-false}
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-sputnik}:${POSTGRES_PASSWORD:-sputnik_password}@db:5432/${POSTGRES_DB:-sputnik_faceid}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - STATIC_PATH=/app/app/static
+      - DEBUG_PHOTOS_TTL_DAYS=${DEBUG_PHOTOS_TTL_DAYS:-7}
+    volumes:
+      - static_data:/app/app/static
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sputnik-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # PostgreSQL база данных
+  db:
+    image: postgres:15-alpine
+    container_name: sputnik-faceid-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-sputnik}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-sputnik_password}
+      - POSTGRES_DB=${POSTGRES_DB:-sputnik_faceid}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - sputnik-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sputnik} -d ${POSTGRES_DB:-sputnik_faceid}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  sputnik-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: sputnik-faceid-postgres-data
+  static_data:
+    name: sputnik-faceid-static-data
