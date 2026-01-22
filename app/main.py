@@ -1,30 +1,39 @@
 """
-Main FastAPI application entry point.
+Sputnik Face ID - Точка входа приложения.
+FastAPI приложение для системы распознавания лиц.
 """
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+
 from contextlib import asynccontextmanager
-import logging
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
+from app.core.logger import get_logger, setup_logging
+from app.core.middleware import TraceIDMiddleware
+from app.core.exceptions import (
+    AppException,
+    app_exception_handler,
+    http_exception_handler,
+    generic_exception_handler,
+)
+from app.api.gateway import router as gateway_router
 from app.modules.employees import router as employees_router
 from app.db import init_db, close_db
 
-# Configure logging
-logging.basicConfig(
-    level=getattr(logging, settings.log_level),
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Lifespan context manager for startup and shutdown events.
-    """
+    """Lifecycle events для приложения."""
     # Startup
-    logger.info("Starting up application...")
+    setup_logging()
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Debug mode: {settings.debug}")
+
+    # Initialize database
     try:
         init_db()
         logger.info("Database initialized successfully")
@@ -35,57 +44,82 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
-    logger.info("Shutting down application...")
+    logger.info("Shutting down application")
     close_db()
     logger.info("Database connections closed")
 
 
-# Create FastAPI application
 app = FastAPI(
     title=settings.app_name,
-    description="Face recognition system for office access control",
-    version="0.1.0",
-    debug=settings.debug,
-    lifespan=lifespan
+    version=settings.app_version,
+    description="Система распознавания лиц для контроля посещаемости офиса",
+    docs_url="/docs" if settings.debug else None,
+    redoc_url="/redoc" if settings.debug else None,
+    lifespan=lifespan,
 )
 
-# Configure CORS
+# Exception handlers
+app.add_exception_handler(AppException, app_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
+
+# Trace ID Middleware (должен быть добавлен первым)
+app.add_middleware(TraceIDMiddleware)
+
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],  # В продакшене указать конкретные домены
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(employees_router)
-
-# Root endpoints
-@app.get("/", tags=["root"])
-def root():
-    """Root endpoint."""
-    return {
-        "message": "Sputnik Face ID API",
-        "status": "running",
-        "version": "0.1.0"
-    }
+# Static files (debug photos)
+app.mount("/static", StaticFiles(directory=settings.static_path), name="static")
 
 
-@app.get("/health", tags=["health"])
-def health_check():
-    """Health check endpoint."""
+# Health check endpoint
+@app.get("/health", tags=["System"])
+async def health_check():
+    """Проверка работоспособности сервиса."""
     return {
         "status": "healthy",
-        "service": settings.app_name
+        "app_name": settings.app_name,
+        "version": settings.app_version,
     }
+
+
+@app.get("/api/v1/info", tags=["System"])
+async def get_info():
+    """Информация о сервисе."""
+    return {
+        "app_name": settings.app_name,
+        "version": settings.app_version,
+        "debug": settings.debug,
+    }
+
+
+# Gateway router (прием изображений от камеры)
+app.include_router(gateway_router)
+
+# Employees router (управление сотрудниками)
+app.include_router(employees_router)
+
+# TODO: Подключение остальных роутеров модулей (будут добавлены по мере реализации)
+# from app.modules.recognition.router import router as recognition_router
+# from app.modules.attendance.router import router as attendance_router
+#
+# app.include_router(recognition_router, prefix="/api/v1/recognition", tags=["Recognition"])
+# app.include_router(attendance_router, prefix="/api/v1/attendance", tags=["Attendance"])
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=settings.debug
+        host=settings.host,
+        port=settings.port,
+        reload=settings.debug,
     )

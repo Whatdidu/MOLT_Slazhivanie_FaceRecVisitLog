@@ -1,30 +1,57 @@
 """
-Application configuration settings.
+Конфигурация приложения через переменные окружения.
+Использует Pydantic Settings для валидации и типизации.
 """
-from pydantic_settings import BaseSettings
-from pydantic import Field
+
+from functools import lru_cache
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables."""
+    """Настройки приложения, загружаемые из .env файла."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+    )
 
     # Application
-    app_name: str = Field(default="Sputnik Face ID", alias="APP_NAME")
-    debug: bool = Field(default=False, alias="DEBUG")
-    log_level: str = Field(default="INFO", alias="LOG_LEVEL")
+    app_name: str = "SputnikFaceID"
+    app_version: str = "0.1.0"
+    debug: bool = False
+
+    # Server
+    host: str = "0.0.0.0"
+    port: int = 8000
 
     # Database
-    database_url: str = Field(alias="DATABASE_URL")
-    db_host: str = Field(default="localhost", alias="DB_HOST")
-    db_port: int = Field(default=5432, alias="DB_PORT")
-    db_user: str = Field(alias="DB_USER")
-    db_password: str = Field(alias="DB_PASSWORD")
-    db_name: str = Field(alias="DB_NAME")
+    database_url: str = "postgresql://user:password@localhost:5432/sputnik_faceid"
+    db_host: str = "localhost"
+    db_port: int = 5432
+    db_user: str = "sputnik"
+    db_password: str = "sputnik_password"
+    db_name: str = "sputnik_faceid"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    # Logging
+    log_level: str = "INFO"
+
+    # Storage
+    static_path: str = "app/static"
+    debug_photos_ttl_days: int = 7
+
+    # Recognition thresholds
+    recognition_match_threshold: float = 0.55
+    recognition_low_confidence_threshold: float = 0.40
 
 
-# Global settings instance
-settings = Settings()
+@lru_cache
+def get_settings() -> Settings:
+    """
+    Возвращает singleton экземпляр настроек.
+    Кэшируется для повторного использования.
+    """
+    return Settings()
+
+
+settings = get_settings()
