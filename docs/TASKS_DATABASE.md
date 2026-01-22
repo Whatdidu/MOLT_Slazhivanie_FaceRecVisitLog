@@ -10,14 +10,14 @@
 
 ## Прогресс
 
-- **Фаза 1:** ✓ 3/5 завершено (60%)
+- **Фаза 1:** ✓ 4/5 завершено (80%)
 - **Фаза 2:** ✓ 4/4 завершено (100%)
 - **Фаза 3:** ✓ 4/4 завершено (100%)
 - **Фаза 4:** ✓ 4/4 завершено (100%)
 - **Фаза 5:** ✓ 4/4 завершено (100%)
 - **Фаза 6:** ✓ 4/4 завершено (100%)
 
-**Общий прогресс:** 23/25 задач (92%)
+**Общий прогресс:** 24/25 задач (96%)
 
 ---
 
@@ -26,7 +26,7 @@
 - [x] **TASK-DB-001**: Настроить подключение к PostgreSQL (`app/db/session.py`) - [#54](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/54)
 - [x] **TASK-DB-002**: Создать базовый класс для моделей (`app/db/base.py`) - [#55](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/55)
 - [x] **TASK-DB-003**: Настроить Alembic для миграций - [#56](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/56)
-- [ ] **TASK-DB-004**: Создать первую миграцию (init)
+- [x] **TASK-DB-004**: Создать первую миграцию (init)
 - [ ] **TASK-DB-004.1**: Применить миграции на production сервере (NEW)
   - Подключиться к БД (креды в `.env` — переменные `SPUTNIK_DB_*`)
   - Выполнить: `alembic upgrade head`
