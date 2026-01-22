@@ -17,12 +17,13 @@ services:
       - DEBUG=${DEBUG:-false}
       - HOST=0.0.0.0
       - PORT=8000
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-sputnik}:${POSTGRES_PASSWORD:-sputnik_password}@db:5432/${POSTGRES_DB:-sputnik_faceid}
+      # Внутри docker-сети обращаемся к db:5432 (внутренний порт контейнера)
+      - DATABASE_URL=postgresql://${SPUTNIK_DB_USER:-sputnik}:${SPUTNIK_DB_PASSWORD:-sputnik_password}@db:5432/${SPUTNIK_DB_NAME:-sputnik_faceid}
       - DB_HOST=db
       - DB_PORT=5432
-      - DB_USER=${POSTGRES_USER:-sputnik}
-      - DB_PASSWORD=${POSTGRES_PASSWORD:-sputnik_password}
-      - DB_NAME=${POSTGRES_DB:-sputnik_faceid}
+      - DB_USER=${SPUTNIK_DB_USER:-sputnik}
+      - DB_PASSWORD=${SPUTNIK_DB_PASSWORD:-sputnik_password}
+      - DB_NAME=${SPUTNIK_DB_NAME:-sputnik_faceid}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - STATIC_PATH=/app/app/static
       - DEBUG_PHOTOS_TTL_DAYS=${DEBUG_PHOTOS_TTL_DAYS:-7}
@@ -40,23 +41,24 @@ services:
       retries: 3
       start_period: 10s
 
-  # PostgreSQL база данных
+  # PostgreSQL база данных для Sputnik FaceID
+  # ВАЖНО: Порт 5433, т.к. 5432 занят другим проектом (sk_lk_payment)
   db:
     image: postgres:15-alpine
     container_name: sputnik-faceid-db
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=${POSTGRES_USER:-sputnik}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-sputnik_password}
-      - POSTGRES_DB=${POSTGRES_DB:-sputnik_faceid}
+      - POSTGRES_USER=${SPUTNIK_DB_USER:-sputnik}
+      - POSTGRES_PASSWORD=${SPUTNIK_DB_PASSWORD:-sputnik_password}
+      - POSTGRES_DB=${SPUTNIK_DB_NAME:-sputnik_faceid}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${SPUTNIK_DB_PORT:-5433}:5432"
     networks:
       - sputnik-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sputnik} -d ${POSTGRES_DB:-sputnik_faceid}"]
+      test: ["CMD-SHELL", "pg_isready -U ${SPUTNIK_DB_USER:-sputnik} -d ${SPUTNIK_DB_NAME:-sputnik_faceid}"]
       interval: 10s
       timeout: 5s
       retries: 5
