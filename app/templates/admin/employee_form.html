@@ -1,0 +1,87 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if employee %}Редактирование{% else %}Новый сотрудник{% endif %}{% endblock %}
+{% block page_title %}{% if employee %}Редактирование сотрудника{% else %}Новый сотрудник{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Имя <span class="text-danger">*</span></label>
+                            <input type="text" name="first_name" class="form-control"
+                                   value="{{ employee.first_name if employee else '' }}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Фамилия <span class="text-danger">*</span></label>
+                            <input type="text" name="last_name" class="form-control"
+                                   value="{{ employee.last_name if employee else '' }}" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Отдел</label>
+                            <input type="text" name="department" class="form-control"
+                                   value="{{ employee.department if employee else '' }}"
+                                   placeholder="Например: IT, HR, Бухгалтерия">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Фото для распознавания</label>
+                            <input type="file" name="photo" class="form-control" accept="image/*"
+                                   {% if not employee %}required{% endif %}>
+                            <div class="form-text">
+                                Загрузите чёткое фото лица сотрудника (JPG, PNG)
+                            </div>
+                        </div>
+
+                        {% if employee %}
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input type="checkbox" name="is_active" class="form-check-input"
+                                       id="is_active" {% if employee.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">
+                                    Сотрудник активен
+                                </label>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if error %}
+                        <div class="col-12">
+                            <div class="alert alert-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if success %}
+                        <div class="col-12">
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle me-2"></i>{{ success }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a href="/admin/employees" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Назад
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>
+                                    {% if employee %}Сохранить{% else %}Создать{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

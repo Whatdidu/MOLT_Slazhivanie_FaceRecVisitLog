@@ -1,6 +1,9 @@
 """
 Sputnik Face ID - Точка входа приложения.
 FastAPI приложение для системы распознавания лиц.
+
+Запуск:
+    uvicorn app.main:app --reload
 """
 
 from contextlib import asynccontextmanager
@@ -8,6 +11,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 from app.core.config import settings
 from app.core.logger import get_logger, setup_logging
@@ -20,6 +24,8 @@ from app.core.exceptions import (
 )
 from app.api.gateway import router as gateway_router
 from app.modules.employees import router as employees_router
+from app.modules.attendance.router import router as attendance_router
+from app.modules.admin.router import router as admin_router
 from app.db import init_db, close_db
 
 logger = get_logger(__name__)
@@ -35,7 +41,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize database
     try:
-        init_db()
+        await init_db()
         logger.info("Database initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}")
@@ -45,7 +51,7 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("Shutting down application")
-    close_db()
+    await close_db()
     logger.info("Database connections closed")
 
 
@@ -79,6 +85,13 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=settings.static_path), name="static")
 
 
+# Root endpoint
+@app.get("/", tags=["System"])
+async def root():
+    """Корневой endpoint - редирект на админку."""
+    return RedirectResponse(url="/admin/")
+
+
 # Health check endpoint
 @app.get("/health", tags=["System"])
 async def health_check():
@@ -106,12 +119,16 @@ app.include_router(gateway_router)
 # Employees router (управление сотрудниками)
 app.include_router(employees_router)
 
+# Attendance router (посещаемость)
+app.include_router(attendance_router)
+
+# Admin router (админ-панель)
+app.include_router(admin_router)
+
 # TODO: Подключение остальных роутеров модулей (будут добавлены по мере реализации)
 # from app.modules.recognition.router import router as recognition_router
-# from app.modules.attendance.router import router as attendance_router
 #
 # app.include_router(recognition_router, prefix="/api/v1/recognition", tags=["Recognition"])
-# app.include_router(attendance_router, prefix="/api/v1/attendance", tags=["Attendance"])
 
 
 if __name__ == "__main__":
