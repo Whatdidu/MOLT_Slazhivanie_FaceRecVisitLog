@@ -22,6 +22,8 @@ from app.core.exceptions import (
     http_exception_handler,
     generic_exception_handler,
 )
+from app.core.tasks import start_background_tasks, stop_background_tasks
+from app.core.storage import get_storage_manager
 from app.api.gateway import router as gateway_router
 from app.modules.employees import router as employees_router
 from app.modules.attendance.router import router as attendance_router
@@ -39,6 +41,10 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     logger.info(f"Debug mode: {settings.debug}")
 
+    # Initialize storage directories
+    storage_manager = get_storage_manager()
+    logger.info("Storage directories initialized")
+
     # Initialize database
     try:
         await init_db()
@@ -47,10 +53,19 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize database: {e}")
         raise
 
+    # Start background tasks (cleanup scheduler)
+    await start_background_tasks()
+    logger.info("Background tasks started")
+
     yield
 
     # Shutdown
     logger.info("Shutting down application")
+
+    # Stop background tasks
+    await stop_background_tasks()
+    logger.info("Background tasks stopped")
+
     await close_db()
     logger.info("Database connections closed")
 

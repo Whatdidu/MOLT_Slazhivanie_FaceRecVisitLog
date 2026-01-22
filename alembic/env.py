@@ -1,9 +1,11 @@
 from logging.config import fileConfig
 import sys
 from pathlib import Path
+from urllib.parse import quote_plus
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import create_engine
 from sqlalchemy import pool
+from sqlalchemy.engine import URL
 
 from alembic import context
 
@@ -19,8 +21,15 @@ from app.db import models  # Import to register models
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set database URL from settings
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Build database URL programmatically to handle special characters in password
+DATABASE_URL = URL.create(
+    drivername="postgresql+psycopg",
+    username=settings.db_user,
+    password=settings.db_password,
+    host=settings.db_host,
+    port=settings.db_port,
+    database=settings.db_name,
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -49,9 +58,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -68,11 +76,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    connectable = create_engine(DATABASE_URL, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(

@@ -13,11 +13,11 @@
 - **Фаза 1:** ✓ 3/5 завершено (60%)
 - **Фаза 2:** ✓ 4/4 завершено (100%)
 - **Фаза 3:** ✓ 4/4 завершено (100%)
-- **Фаза 4:** 0/4 завершено (0%)
-- **Фаза 5:** 0/4 завершено (0%)
-- **Фаза 6:** 1/4 завершено (25%)
+- **Фаза 4:** ✓ 4/4 завершено (100%)
+- **Фаза 5:** ✓ 4/4 завершено (100%)
+- **Фаза 6:** ✓ 4/4 завершено (100%)
 
-**Общий прогресс:** 12/25 задач (48%)
+**Общий прогресс:** 23/25 задач (92%)
 
 ---
 
@@ -56,23 +56,23 @@
 
 ## Фаза 4: Enrollment (регистрация сотрудников)
 
-- [ ] **TASK-DB-013**: Реализовать сервис регистрации (`app/modules/employees/service.py`) - [#63](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/63)
-- [ ] **TASK-DB-014**: Интегрировать с модулем Recognition для создания эмбеддингов - [#64](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/64)
-- [ ] **TASK-DB-015**: Реализовать сохранение фото во временное хранилище
-- [ ] **TASK-DB-016**: Добавить endpoint для загрузки фото (`POST /api/v1/employees/enroll`) - [#65](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/65)
+- [x] **TASK-DB-013**: Реализовать сервис регистрации (`app/modules/employees/service.py`) - [#63](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/63)
+- [x] **TASK-DB-014**: Интегрировать с модулем Recognition для создания эмбеддингов - [#64](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/64)
+- [x] **TASK-DB-015**: Реализовать сохранение фото во временное хранилище
+- [x] **TASK-DB-016**: Добавить endpoint для загрузки фото (`POST /api/v1/employees/enroll`) - [#65](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/65)
 
 ## Фаза 5: Управление хранилищем
 
-- [ ] **TASK-DB-017**: Создать утилиту для управления TTL (`app/core/storage.py`) - [#66](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/66)
-- [ ] **TASK-DB-018**: Реализовать автоудаление старых снапшотов (7 дней) - [#67](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/67)
-- [ ] **TASK-DB-019**: Добавить фоновую задачу для очистки (или cron)
-- [ ] **TASK-DB-020**: Настроить структуру папок в `/static/debug_photos`
+- [x] **TASK-DB-017**: Создать утилиту для управления TTL (`app/core/storage.py`) - [#66](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/66)
+- [x] **TASK-DB-018**: Реализовать автоудаление старых снапшотов (7 дней) - [#67](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/67)
+- [x] **TASK-DB-019**: Добавить фоновую задачу для очистки (или cron)
+- [x] **TASK-DB-020**: Настроить структуру папок в `/static/debug_photos`
 
 ## Фаза 6: Тесты и документация
 
-- [ ] **TASK-DB-021**: Написать unit-тесты для CRUD операций - [#68](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/68)
-- [ ] **TASK-DB-022**: Написать тесты для Enrollment flow - [#69](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/69)
-- [ ] **TASK-DB-023**: Создать тестовые данные (fixtures)
+- [x] **TASK-DB-021**: Написать unit-тесты для CRUD операций - [#68](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/68)
+- [x] **TASK-DB-022**: Написать тесты для Enrollment flow - [#69](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/69)
+- [x] **TASK-DB-023**: Создать тестовые данные (fixtures)
 - [x] **TASK-DB-024**: Документация API (OpenAPI/Swagger) - автогенерируется FastAPI
 
 ---

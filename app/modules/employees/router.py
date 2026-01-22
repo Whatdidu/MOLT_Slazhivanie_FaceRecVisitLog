@@ -1,9 +1,10 @@
 """
 FastAPI router for Employee API endpoints.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from typing import Optional
 
 from app.db.session import get_db
 from app.modules.employees.crud import employee_crud
@@ -12,12 +13,103 @@ from app.modules.employees.schemas import (
     EmployeeUpdate,
     EmployeeResponse,
     EmployeeListResponse,
+    EmployeeEnrollResponse,
+    EmbeddingResponse,
+)
+from app.modules.employees.service import (
+    get_employee_service,
+    EmailAlreadyExistsError,
+    NoFaceDetectedError,
+    LowQualityPhotoError,
 )
 
 router = APIRouter(
     prefix="/api/v1/employees",
     tags=["employees"]
 )
+
+
+@router.post(
+    "/enroll",
+    response_model=EmployeeEnrollResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Enroll a new employee with photo"
+)
+async def enroll_employee(
+    full_name: str = Form(..., description="Full name of the employee"),
+    email: str = Form(..., description="Unique email address"),
+    department: Optional[str] = Form(None, description="Department name"),
+    photo: UploadFile = File(..., description="Employee photo (JPEG/PNG)"),
+    db: Session = Depends(get_db)
+):
+    """
+    Enroll a new employee with face photo.
+
+    This endpoint:
+    1. Validates the photo contains a detectable face
+    2. Creates face embedding for recognition
+    3. Saves the photo to storage
+    4. Creates employee and embedding records
+
+    - **full_name**: Full name of the employee
+    - **email**: Unique email address
+    - **department**: Department name (optional)
+    - **photo**: Face photo file (JPEG/PNG, must contain one clear face)
+    """
+    # Validate file type
+    if photo.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file type. Only JPEG and PNG are supported."
+        )
+
+    # Read photo bytes
+    photo_bytes = await photo.read()
+
+    # Validate file size (max 10MB)
+    if len(photo_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File too large. Maximum size is 10MB."
+        )
+
+    service = get_employee_service()
+
+    try:
+        employee, embedding = await service.enroll_employee(
+            db=db,
+            full_name=full_name,
+            email=email,
+            photo=photo_bytes,
+            department=department,
+        )
+
+        return EmployeeEnrollResponse(
+            employee=EmployeeResponse.model_validate(employee),
+            embedding=EmbeddingResponse.model_validate(embedding),
+            message="Employee enrolled successfully",
+        )
+
+    except EmailAlreadyExistsError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except NoFaceDetectedError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No face detected in the provided photo. Please upload a clear photo with a visible face."
+        )
+    except LowQualityPhotoError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to enroll employee: {str(e)}"
+        )
 
 
 @router.post(
