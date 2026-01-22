@@ -1,10 +1,62 @@
+# Environment variables
 .env
 .env.local
+
+# Python
 *.pyc
 __pycache__/
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
 .venv/
 venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.claude/
+
+# OS
 .DS_Store
+Thumbs.db
 
 # Local data
 data/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Alembic
+alembic/versions/__pycache__/
+
+# Logs
+*.log
+logs/
+
+# Static files (uploaded photos)
+static/debug_photos/
+static/employees/
+
+# Docker
+*.env.prod
+docker-compose.override.yml
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Distribution
+dist/
+build/
+*.egg-info/

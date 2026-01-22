@@ -1,8 +1,11 @@
 """
 Настройка подключения к базе данных.
+
+Поддерживает async операции через aiosqlite/asyncpg.
 """
 
 import os
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -14,6 +17,8 @@ from sqlalchemy.ext.asyncio import (
 
 from app.db.models import Base
 
+
+logger = logging.getLogger(__name__)
 
 # Получаем URL базы данных из переменных окружения
 # По умолчанию используем SQLite для разработки
@@ -42,13 +47,21 @@ async_session_maker = async_sessionmaker(
 
 async def init_db():
     """Инициализация базы данных (создание таблиц)."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    logger.info("Initializing database...")
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("✅ Database initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
+        raise
 
 
 async def close_db():
     """Закрытие соединений с БД."""
+    logger.info("Closing database connections...")
     await engine.dispose()
+    logger.info("Database connections closed")
 
 
 @asynccontextmanager

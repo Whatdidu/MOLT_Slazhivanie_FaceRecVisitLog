@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh:*)",
+      "Bash(winget install:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(export GH_TOKEN=\"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\")",
+      "Bash(python scripts/add_remaining_issues.py:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}
