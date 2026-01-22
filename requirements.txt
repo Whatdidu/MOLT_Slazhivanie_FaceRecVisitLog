@@ -1,6 +1,17 @@
-# FastAPI and web
+# Sputnik Face ID - Dependencies
+# ================================
+
+# Web Framework
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
+
+# Configuration
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+email-validator>=2.0.0
+
+# File uploads
 python-multipart>=0.0.6
 
 # Templates
@@ -8,34 +19,34 @@ jinja2>=3.1.0
 
 # Database
 sqlalchemy>=2.0.0
-aiosqlite>=0.19.0
-asyncpg>=0.29.0
 alembic>=1.12.0
 psycopg[binary]>=3.1.0
+aiosqlite>=0.19.0
+asyncpg>=0.29.0
 greenlet>=3.0.0
 
-# Export
-openpyxl>=3.1.0
-
-# Validation
-pydantic>=2.5.0
-pydantic-settings>=2.1.0
-email-validator>=2.0.0
-
-# ML/Recognition (for Enrollment)
+# ML/Recognition
 deepface>=0.0.79
 opencv-python-headless>=4.7.0
 numpy>=1.23.0
 tf-keras>=2.15.0
 
+# HTTP Client
+httpx>=0.26.0
+
+# Export (для attendance)
+openpyxl>=3.1.0
+
 # Utilities
 aiofiles>=23.0.0
 Pillow>=10.0.0
+python-dateutil>=2.8.2
 
 # Testing
 pytest>=7.4.0
 pytest-asyncio>=0.23.0
-httpx>=0.26.0
 
 # Development
-python-dotenv>=1.0.0
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.1.0

@@ -1,7 +1,5 @@
 # Задачи модуля Recognition (Мансур)
 
-**Ветка:** `feature/ml-recognition`
-
 ## Статусы
 - [ ] Не начато
 - [x] Выполнено
@@ -43,18 +41,14 @@
 ### Методы RecognitionService
 
 ```python
-from app.modules.recognition import get_recognition_service
-
-service = get_recognition_service()
-
 # Используется модулем employees при регистрации
-await service.create_embedding(image: bytes) -> EmbeddingResult
+async def create_embedding(image: bytes) -> EmbeddingResult
 
 # Используется при распознавании с камеры
-await service.recognize_face(image: bytes, embeddings_db: list) -> RecognitionResult
+async def recognize_face(image: bytes, embeddings_db: list) -> RecognitionResult
 
 # Вспомогательный метод сравнения
-await service.compare_faces(embedding1: list, embedding2: list) -> float
+async def compare_faces(embedding1: list, embedding2: list) -> float
 ```
 
 ### Статусы распознавания
@@ -66,17 +60,6 @@ await service.compare_faces(embedding1: list, embedding2: list) -> float
 | `unknown` | < 0.40 | Не найдено в базе |
 | `no_face` | - | Лицо не обнаружено |
 | `error` | - | Ошибка обработки |
-
----
-
-## API Endpoints
-
-```
-POST /api/v1/recognition/detect     - Распознать лицо
-POST /api/v1/recognition/embedding  - Создать эмбеддинг
-POST /api/v1/recognition/compare    - Сравнить два вектора
-GET  /api/v1/recognition/health     - Проверка сервиса
-```
 
 ---
 
