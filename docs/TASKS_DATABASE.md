@@ -13,11 +13,11 @@
 - **Фаза 1:** ✓ 3/5 завершено (60%)
 - **Фаза 2:** ✓ 4/4 завершено (100%)
 - **Фаза 3:** ✓ 4/4 завершено (100%)
-- **Фаза 4:** 0/4 завершено (0%)
+- **Фаза 4:** ✓ 3/4 завершено (75%) — Лиля взяла задачи
 - **Фаза 5:** 0/4 завершено (0%)
 - **Фаза 6:** 1/4 завершено (25%)
 
-**Общий прогресс:** 12/25 задач (48%)
+**Общий прогресс:** 15/25 задач (60%)
 
 ---
 
@@ -56,10 +56,10 @@
 
 ## Фаза 4: Enrollment (регистрация сотрудников)
 
-- [ ] **TASK-DB-013**: Реализовать сервис регистрации (`app/modules/employees/service.py`) - [#63](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/63)
-- [ ] **TASK-DB-014**: Интегрировать с модулем Recognition для создания эмбеддингов - [#64](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/64)
-- [ ] **TASK-DB-015**: Реализовать сохранение фото во временное хранилище
-- [ ] **TASK-DB-016**: Добавить endpoint для загрузки фото (`POST /api/v1/employees/enroll`) - [#65](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/65)
+- [x] **TASK-DB-013**: Реализовать сервис регистрации (`app/modules/employees/enrollment.py`) - [#63](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/63) ✅ *Лиля, 22.01.2026*
+- [ ] **TASK-DB-014**: Интегрировать с модулем Recognition для создания эмбеддингов - [#64](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/64) *(mock-векторы реализованы, ждём модуль Мансура)*
+- [x] **TASK-DB-015**: Реализовать сохранение фото во временное хранилище ✅ *Лиля, 22.01.2026*
+- [x] **TASK-DB-016**: Добавить endpoint для загрузки фото (`POST /api/v1/employees/enroll`) - [#65](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/65) ✅ *Лиля, 22.01.2026*
 
 ## Фаза 5: Управление хранилищем
 
