@@ -11,7 +11,7 @@ Pydantic models:
     - EmbeddingResult, EmployeeEmbedding
 """
 
-from .service import RecognitionService, get_recognition_service
+from .service import RecognitionService, get_recognition_service, init_recognition_service
 from .router import router
 from .models import (
     RecognitionRequest,
@@ -36,6 +36,7 @@ __all__ = [
     # Service
     "RecognitionService",
     "get_recognition_service",
+    "init_recognition_service",
     "router",
     # Models
     "RecognitionRequest",
