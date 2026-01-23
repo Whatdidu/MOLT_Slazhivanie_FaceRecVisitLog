@@ -8,11 +8,17 @@ from datetime import datetime
 from io import BytesIO
 from typing import Optional
 
-from fastapi import APIRouter, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile, status, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.logger import get_logger
+from app.db.session import get_db
+from app.modules.recognition import get_recognition_service
+from app.modules.recognition.models import EmployeeEmbedding
+from app.modules.employees.crud import employee_crud
+from app.modules.attendance.service import get_attendance_service
 
 logger = get_logger(__name__)
 
@@ -122,6 +128,7 @@ def validate_image_dimensions(image_bytes: bytes, trace_id: str) -> tuple[int, i
 async def receive_snapshot(
     request: Request,
     file: UploadFile = File(..., description="Изображение с камеры (JPEG/PNG)"),
+    db: Session = Depends(get_db),
 ):
     """
     Принимает снапшот от камеры для распознавания.
@@ -152,18 +159,64 @@ async def receive_snapshot(
         f"dimensions={width}x{height}"
     )
 
-    # TODO: Интеграция с модулем recognition
-    # from app.modules.recognition import get_recognition_service
-    # service = get_recognition_service()
-    # result = await service.recognize_face(image_bytes, embeddings_db)
+    # 1. Получить все embeddings из БД
+    embeddings_raw = employee_crud.get_all_embeddings(db)
 
-    # Временный ответ (заглушка)
+    # 2. Конвертировать в формат для Recognition
+    embeddings_db = []
+    for emp_id, vector in embeddings_raw:
+        # Получить имя сотрудника
+        employee = employee_crud.get(db, emp_id)
+        if employee:
+            embeddings_db.append(
+                EmployeeEmbedding(
+                    person_id=emp_id,
+                    person_name=employee.full_name,
+                    embedding=vector
+                )
+            )
+
+    logger.info(f"[{trace_id}] Loaded {len(embeddings_db)} embeddings from DB")
+
+    # 3. Распознать лицо
+    recognition_service = get_recognition_service()
+    result = await recognition_service.recognize_face(image_bytes, embeddings_db)
+
+    logger.info(
+        f"[{trace_id}] Recognition completed: status={result.status}, "
+        f"person_id={result.person_id}, confidence={result.confidence:.2f}"
+    )
+
+    # 4. Если найден сотрудник - записать в журнал
+    if result.status == "match" and result.person_id:
+        attendance_service = get_attendance_service()
+
+        # Проверить анти-спам
+        can_log = await attendance_service.can_log_entry(result.person_id)
+        if can_log:
+            # Записать вход
+            await attendance_service.log_entry(
+                employee_id=result.person_id,
+                confidence=result.confidence,
+                trace_id=trace_id
+            )
+            logger.info(f"[{trace_id}] Attendance logged for employee {result.person_id}")
+        else:
+            logger.info(
+                f"[{trace_id}] Attendance not logged (cooldown active) "
+                f"for employee {result.person_id}"
+            )
+
     return SnapshotResponse(
         trace_id=trace_id,
-        status="received",
-        message="Snapshot received and validated. Recognition pending integration.",
+        status=result.status,
+        message=f"Recognition completed: {result.status}",
         timestamp=timestamp,
-        recognition_result=None,
+        recognition_result={
+            "person_id": result.person_id,
+            "person_name": result.person_name,
+            "confidence": result.confidence,
+        }
     )
 
 

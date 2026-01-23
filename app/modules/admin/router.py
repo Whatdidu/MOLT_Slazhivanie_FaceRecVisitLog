@@ -14,15 +14,23 @@ Routes:
 from datetime import date, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Request, Query, Form, UploadFile, File
+from fastapi import APIRouter, Request, Query, Form, UploadFile, File, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from sqlalchemy import select, func
+from sqlalchemy.orm import Session
 
 from app.db import get_session, Employee
+from app.db.session import get_db
 from app.modules.attendance.service import get_attendance_service
 from app.modules.attendance.models import EventType
+from app.modules.employees.service import (
+    get_employee_service,
+    EmailAlreadyExistsError,
+    NoFaceDetectedError,
+    LowQualityPhotoError,
+)
 from app.core.storage import get_storage_manager
 from app.core.tasks import get_task_manager
 
@@ -146,41 +154,47 @@ async def create_employee(
     last_name: str = Form(...),
     department: str = Form(None),
     photo: UploadFile = File(...),
+    db: Session = Depends(get_db),
 ):
-    """Создание нового сотрудника."""
+    """Создание нового сотрудника через EmployeeService с face embedding."""
     error = None
-    success = None
+
+    # Объединяем имя и фамилию
+    full_name = f"{first_name} {last_name}"
+    # Генерируем email (можно заменить на поле формы)
+    email = f"{first_name.lower()}.{last_name.lower()}@sputnik.kz"
 
     try:
-        async with get_session() as session:
-            # Создаём сотрудника
-            employee = Employee(
-                first_name=first_name,
-                last_name=last_name,
-                department=department,
-                is_active=1,
-            )
-            session.add(employee)
-            await session.flush()
+        # Читаем фото
+        photo_bytes = await photo.read()
 
-            # TODO: Обработка фото и создание embedding через модуль Recognition
-            # photo_content = await photo.read()
-            # embedding = await recognition_service.create_embedding(photo_content)
+        # Используем EmployeeService для enrollment
+        service = get_employee_service()
 
-            await session.commit()
-            success = f"Сотрудник {first_name} {last_name} успешно создан"
+        employee, embedding = await service.enroll_employee(
+            db=db,
+            full_name=full_name,
+            email=email,
+            photo=photo_bytes,
+            department=department,
+        )
 
-            return RedirectResponse(url="/admin/employees", status_code=303)
+        return RedirectResponse(url="/admin/employees", status_code=303)
 
-    except Exception as e:
+    except EmailAlreadyExistsError as e:
+        error = f"Email уже существует: {email}"
+    except NoFaceDetectedError:
+        error = "Лицо не обнаружено на фото. Загрузите фото с четким изображением лица."
+    except LowQualityPhotoError as e:
         error = str(e)
+    except Exception as e:
+        error = f"Ошибка при создании сотрудника: {str(e)}"
 
     return templates.TemplateResponse("admin/employee_form.html", {
         "request": request,
         "active_page": "employees",
         "employee": None,
         "error": error,
-        "success": success,
     })
 
 

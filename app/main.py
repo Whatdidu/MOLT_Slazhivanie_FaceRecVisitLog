@@ -29,6 +29,7 @@ from app.modules.employees import router as employees_router
 from app.modules.attendance.router import router as attendance_router
 from app.modules.admin.router import router as admin_router
 from app.db import init_db, close_db
+from app.modules.recognition import init_recognition_service
 
 logger = get_logger(__name__)
 
@@ -52,6 +53,17 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}")
         raise
+
+    # Initialize recognition service
+    try:
+        recognition_service = await init_recognition_service()
+        if recognition_service.is_ready():
+            logger.info("✅ Recognition service initialized successfully")
+        else:
+            logger.warning("⚠️ Recognition service not ready (mock mode)")
+    except Exception as e:
+        logger.error(f"Failed to initialize recognition service: {e}")
+        logger.warning("Application will continue with limited functionality")
 
     # Start background tasks (cleanup scheduler)
     await start_background_tasks()

@@ -76,12 +76,10 @@ class EnrollmentService:
                 await session.flush()
 
                 # Сохраняем embedding
-                vector_blob = self._vector_to_blob(vector)
                 embedding = Embedding(
                     employee_id=employee.id,
-                    vector_blob=vector_blob,
-                    vector_dim=len(vector),
-                    model_version="mock-v1",  # Заменить на реальную версию
+                    vector=vector,
+                    model_version="dlib-face_recognition-1.3.0",
                 )
                 session.add(embedding)
                 await session.flush()
@@ -97,7 +95,7 @@ class EnrollmentService:
                     },
                     "embedding": {
                         "id": embedding.id,
-                        "vector_dim": embedding.vector_dim,
+                        "vector_dim": len(vector),
                         "model_version": embedding.model_version,
                     },
                     "message": "Сотрудник успешно зарегистрирован",
@@ -134,26 +132,25 @@ class EnrollmentService:
 
     async def _get_face_embedding(self, photo_path: Path) -> Optional[List[float]]:
         """
-        Получить face embedding из фото.
-
-        TODO: Заменить на вызов реального Recognition сервиса (Мансур).
-        Сейчас возвращает mock-вектор для тестирования.
+        Получить face embedding из фото через Recognition сервис.
         """
-        # MOCK: Возвращаем случайный вектор для тестирования
-        # В реальности здесь будет вызов:
-        # from app.modules.recognition import recognition_service
-        # return await recognition_service.get_embedding(photo_path)
+        from app.modules.recognition import get_recognition_service
 
-        import random
-        # Генерируем псевдослучайный вектор на основе имени файла
-        random.seed(str(photo_path))
-        vector = [random.uniform(-1, 1) for _ in range(512)]
+        # Читаем фото
+        with open(photo_path, 'rb') as f:
+            image_bytes = f.read()
 
-        # Нормализуем вектор
-        norm = sum(x**2 for x in vector) ** 0.5
-        vector = [x / norm for x in vector]
+        # Создаём embedding через Recognition сервис
+        recognition_service = get_recognition_service()
+        result = await recognition_service.create_embedding(image_bytes)
 
-        return vector
+        if not result.face_detected:
+            return None
+
+        if result.face_quality < 0.3:  # Минимальный порог качества
+            return None
+
+        return result.embedding
 
     def _vector_to_blob(self, vector: List[float]) -> bytes:
         """Конвертировать вектор в бинарный формат."""
@@ -180,7 +177,7 @@ class EnrollmentService:
             rows = result.all()
 
             return [
-                (row.Embedding.employee_id, self._blob_to_vector(row.Embedding.vector_blob))
+                (row.Embedding.employee_id, row.Embedding.vector)
                 for row in rows
             ]
 
