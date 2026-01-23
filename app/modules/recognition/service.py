@@ -196,9 +196,70 @@ class RecognitionService:
 _recognition_service: RecognitionService | None = None
 
 
-def get_recognition_service() -> RecognitionService:
-    """Получить singleton экземпляр сервиса."""
+def get_recognition_service(provider_name: str | None = None) -> RecognitionService:
+    """
+    Получить singleton экземпляр сервиса.
+
+    Args:
+        provider_name: Название провайдера ("dlib", "mock").
+                      Если None — берётся из конфига RECOGNITION_PROVIDER.
+
+    Returns:
+        RecognitionService с настроенным провайдером
+    """
     global _recognition_service
     if _recognition_service is None:
-        _recognition_service = RecognitionService()
+        # Получаем провайдер из конфига, если не указан явно
+        if provider_name is None:
+            from app.core.config import settings
+            provider_name = getattr(settings, 'recognition_provider', 'dlib')
+
+        provider = _create_provider(provider_name)
+        _recognition_service = RecognitionService(provider=provider)
+
     return _recognition_service
+
+
+def _create_provider(provider_name: str):
+    """
+    Создаёт провайдер по имени.
+
+    Args:
+        provider_name: "dlib" или "mock"
+
+    Returns:
+        Экземпляр провайдера или None для mock режима
+    """
+    provider_name = provider_name.lower()
+
+    if provider_name == "mock":
+        return None
+
+    if provider_name == "dlib":
+        try:
+            from .providers.dlib_provider import get_dlib_provider
+            return get_dlib_provider()
+        except ImportError as e:
+            import logging
+            logging.warning(f"face_recognition не установлен: {e}. Используем mock режим.")
+            return None
+
+    # Неизвестный провайдер — mock
+    import logging
+    logging.warning(f"Неизвестный провайдер: {provider_name}. Используем mock режим.")
+    return None
+
+
+async def init_recognition_service(provider_name: str | None = None) -> RecognitionService:
+    """
+    Инициализировать сервис распознавания (загрузить модели).
+
+    Args:
+        provider_name: Название провайдера ("dlib", "mock").
+                      Если None — берётся из конфига RECOGNITION_PROVIDER.
+
+    Вызывать при старте приложения (lifespan).
+    """
+    service = get_recognition_service(provider_name=provider_name)
+    await service.initialize()
+    return service

@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     recognition_match_threshold: float = 0.55
     recognition_low_confidence_threshold: float = 0.40
 
+    # Recognition provider: "dlib" or "mock"
+    # - dlib: lightweight, ~500 MB RAM (рекомендуется для серверов с 2 GB)
+    # - mock: без ML, для тестирования
+    recognition_provider: str = "dlib"
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -23,6 +23,8 @@ from sqlalchemy import select, func
 from app.db import get_session, Employee
 from app.modules.attendance.service import get_attendance_service
 from app.modules.attendance.models import EventType
+from app.core.storage import get_storage_manager
+from app.core.tasks import get_task_manager
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -255,3 +257,25 @@ async def reports(
         "unique_employees": unique_employees,
         "avg_confidence": avg_confidence,
     })
+
+
+# ============== Storage Management API ==============
+
+@router.get("/api/storage/stats")
+async def get_storage_stats():
+    """Get storage statistics."""
+    manager = get_storage_manager()
+    return manager.get_storage_stats()
+
+
+@router.post("/api/storage/cleanup")
+async def run_cleanup(dry_run: bool = Query(False, description="Preview without deleting")):
+    """
+    Run storage cleanup manually.
+
+    Args:
+        dry_run: If True, only report what would be deleted
+    """
+    task_manager = get_task_manager()
+    result = await task_manager.run_cleanup_now(dry_run=dry_run)
+    return result

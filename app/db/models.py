@@ -35,7 +35,17 @@ class EventType(str, enum.Enum):
 
 class Employee(Base):
     """
-    Модель сотрудника.
+    Employee model for storing employee information.
+
+    Fields:
+        id: Primary key
+        full_name: Full name of the employee
+        email: Unique email address
+        department: Department name (optional)
+        photo_path: Path to employee photo (temporary)
+        is_active: Whether the employee is active (soft delete)
+        created_at: Record creation timestamp
+        updated_at: Record last update timestamp
     """
 
     __tablename__ = "employees"
@@ -49,8 +59,8 @@ class Employee(Base):
     photo_path = Column(String(500), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
 
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
     embeddings = relationship(
@@ -65,12 +75,21 @@ class Employee(Base):
     )
 
     def __repr__(self):
-        return f"<Employee(id={self.id}, name={self.full_name})>"
+        return f"<Employee(id={self.id}, name='{self.full_name}', email='{self.email}')>"
 
 
 class Embedding(Base):
     """
-    Модель для хранения face embeddings (векторов лиц).
+    Embedding model for storing face embeddings (vectors).
+
+    Fields:
+        id: Primary key
+        employee_id: Foreign key to Employee
+        vector_blob: Face embedding vector as binary (SQLite compatible)
+        vector_dim: Dimension of the vector
+        model_version: Version of the ML model used
+        created_at: Record creation timestamp
+        updated_at: Record last update timestamp
     """
 
     __tablename__ = "embeddings"
@@ -88,18 +107,32 @@ class Embedding(Base):
     vector_dim = Column(Integer, nullable=False, default=512)
     model_version = Column(String(50), nullable=False, default="arcface")
 
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
     employee = relationship("Employee", back_populates="embeddings")
 
     def __repr__(self):
-        return f"<Embedding(id={self.id}, employee_id={self.employee_id}, model={self.model_version})>"
+        return f"<Embedding(id={self.id}, employee_id={self.employee_id}, model='{self.model_version}')>"
 
 
 class AttendanceLog(Base):
-    """Журнал посещений."""
+    """
+    Attendance log model for tracking employee visits.
+
+    Fields:
+        id: Primary key
+        employee_id: Foreign key to Employee (nullable for unknown faces)
+        event_type: Type of event (entry/exit)
+        timestamp: Event timestamp
+        confidence: Recognition confidence score (0-1)
+        trace_id: Unique trace ID for request tracking
+        photo_path: Path to snapshot photo (TTL 7 days)
+        status: Recognition status (match/unknown/low_confidence/no_face/error)
+        created_at: Record creation timestamp
+        updated_at: Record last update timestamp
+    """
 
     __tablename__ = "attendance_log"
 
@@ -107,27 +140,26 @@ class AttendanceLog(Base):
     employee_id = Column(
         Integer,
         ForeignKey("employees.id", ondelete="SET NULL"),
-        nullable=True
+        nullable=True,
+        index=True
     )
     event_type = Column(SQLEnum(EventType), nullable=False, default=EventType.ENTRY)
-    timestamp = Column(DateTime, nullable=False, default=datetime.now)
+    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
     confidence = Column(Float, nullable=True)
-    trace_id = Column(String(64), nullable=False)
+    trace_id = Column(String(64), nullable=False, index=True)
     photo_path = Column(String(500), nullable=True)
     status = Column(String(20), nullable=False, default="unknown")
 
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationship
     employee = relationship("Employee", back_populates="attendance_logs")
 
     # Индексы для быстрого поиска
     __table_args__ = (
-        Index("ix_attendance_log_employee_id", "employee_id"),
-        Index("ix_attendance_log_timestamp", "timestamp"),
         Index("ix_attendance_log_employee_timestamp", "employee_id", "timestamp"),
     )
 
     def __repr__(self):
-        return f"<AttendanceLog(id={self.id}, employee_id={self.employee_id}, event={self.event_type}, time={self.timestamp})>"
+        return f"<AttendanceLog(id={self.id}, employee_id={self.employee_id}, status='{self.status}', trace_id='{self.trace_id}')>"

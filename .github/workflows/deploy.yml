@@ -1,0 +1,41 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:  # Ручной запуск
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Deploy to VPS
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        VPS_HOST: ${{ secrets.VPS_HOST }}
+        VPS_USER: ${{ secrets.VPS_USER }}
+        DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+      run: |
+        # Настройка SSH
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+        # Деплой на сервер
+        ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+          cd /var/www/sputnik-faceid
+          git pull origin master
+
+          # Обновить .env с секретами
+          echo "SPUTNIK_DB_PASSWORD=${{ secrets.PRODUCTION_DB_PASSWORD }}" >> .env
+
+          # Перезапустить контейнеры
+          docker-compose down
+          docker-compose up -d --build
+
+          # Применить миграции
+          docker-compose exec -T app alembic upgrade head
+        EOF

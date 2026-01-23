@@ -16,25 +16,27 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.db.models import Base
+from app.core.config import settings
 
 
 logger = logging.getLogger(__name__)
 
-# Получаем URL базы данных из переменных окружения
-# По умолчанию используем SQLite для разработки
+# Определяем URL базы данных
+# Для разработки используем SQLite, для продакшена - PostgreSQL
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "sqlite+aiosqlite:///./data/attendance.db"
 )
 
-# Для PostgreSQL URL будет выглядеть так:
-# DATABASE_URL = "postgresql+asyncpg://user:password@localhost:5432/dbname"
+# Если указан PostgreSQL URL, конвертируем в async версию
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 
 # Создаём асинхронный движок
 engine = create_async_engine(
     DATABASE_URL,
-    echo=os.getenv("SQL_ECHO", "false").lower() == "true",
+    echo=settings.debug,
 )
 
 # Фабрика сессий
