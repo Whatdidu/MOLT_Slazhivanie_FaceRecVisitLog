@@ -159,6 +159,11 @@ DEBUG_PHOTOS_TTL_DAYS=7
 # Recognition thresholds
 RECOGNITION_MATCH_THRESHOLD=0.55
 RECOGNITION_LOW_CONFIDENCE_THRESHOLD=0.40
+
+# Recognition provider (NEW)
+# - "dlib" : lightweight, ~500 MB RAM (по умолчанию)
+# - "mock" : без ML, для тестирования
+RECOGNITION_PROVIDER=dlib
 ```
 
 ---
