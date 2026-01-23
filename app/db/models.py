@@ -143,7 +143,7 @@ class AttendanceLog(Base):
         nullable=True,
         index=True
     )
-    event_type = Column(SQLEnum(EventType), nullable=False, default=EventType.ENTRY)
+    event_type = Column(String(20), nullable=False, default=EventType.ENTRY.value)
     timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
     confidence = Column(Float, nullable=True)
     trace_id = Column(String(64), nullable=False, index=True)
