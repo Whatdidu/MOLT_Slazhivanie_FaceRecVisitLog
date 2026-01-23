@@ -275,7 +275,7 @@ class AttendanceService:
 
             # Получаем общее количество активных сотрудников
             result = await session.execute(
-                select(func.count(Employee.id)).where(Employee.is_active == 1)
+                select(func.count(Employee.id)).where(Employee.is_active == True)
             )
             total_employees = result.scalar() or 0
 

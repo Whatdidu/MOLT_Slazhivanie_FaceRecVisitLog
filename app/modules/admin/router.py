@@ -105,7 +105,7 @@ async def attendance(
 
     # Получаем список сотрудников для фильтра
     async with get_session() as session:
-        result = await session.execute(select(Employee).where(Employee.is_active == 1))
+        result = await session.execute(select(Employee).where(Employee.is_active == True))
         employees_list = result.scalars().all()
 
     return templates.TemplateResponse("admin/attendance.html", {
