@@ -9,6 +9,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     libpq-dev \
     postgresql-client \
+    libglib2.0-0 \
+    libxcb1 \
+    libxrender1 \
+    libxext6 \
+    libsm6 \
+    libice6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Установка рабочей директории
@@ -25,6 +31,12 @@ FROM python:3.11-slim as production
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     postgresql-client \
+    libglib2.0-0 \
+    libxcb1 \
+    libxrender1 \
+    libxext6 \
+    libsm6 \
+    libice6 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
