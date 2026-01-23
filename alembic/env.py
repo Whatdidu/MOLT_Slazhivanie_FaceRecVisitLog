@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # Import our models and settings
 from app.core.config import settings
-from app.db.session import Base
+from app.db.models import Base  # Import Base from models, not session (avoids async engine init)
 from app.db import models  # Import to register models
 
 # this is the Alembic Config object, which provides
@@ -22,8 +22,9 @@ from app.db import models  # Import to register models
 config = context.config
 
 # Build database URL programmatically to handle special characters in password
+# Use psycopg2 for sync Alembic migrations
 DATABASE_URL = URL.create(
-    drivername="postgresql+psycopg",
+    drivername="postgresql+psycopg2",
     username=settings.db_user,
     password=settings.db_password,
     host=settings.db_host,
