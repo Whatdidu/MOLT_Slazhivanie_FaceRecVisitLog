@@ -29,7 +29,7 @@ from app.modules.admin.router import router as admin_router
 from app.modules.employees.router import router as employees_router
 from app.modules.recognition.router import router as recognition_router
 from app.db import init_db, close_db
-from app.modules.recognition import init_recognition_service
+from app.modules.recognition import get_recognition_service
 
 logger = get_logger(__name__)
 
@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize recognition service
     try:
-        recognition_service = await init_recognition_service()
+        recognition_service = get_recognition_service()
         if recognition_service.is_ready():
             logger.info("✅ Recognition service initialized successfully")
         else:
