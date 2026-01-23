@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize recognition service
     try:
-        recognition_service = get_recognition_service()
+        recognition_service = await init_recognition_service()
         if recognition_service.is_ready():
             logger.info("✅ Recognition service initialized successfully")
         else:
