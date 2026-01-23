@@ -27,6 +27,7 @@ from app.core.storage import get_storage_manager
 from app.modules.attendance.router import router as attendance_router
 from app.modules.admin.router import router as admin_router
 from app.modules.employees.router import router as employees_router
+from app.modules.recognition.router import router as recognition_router
 from app.db import init_db, close_db
 
 logger = get_logger(__name__)
@@ -131,6 +132,7 @@ async def get_info():
 app.include_router(attendance_router)
 app.include_router(admin_router)
 app.include_router(employees_router)
+app.include_router(recognition_router)
 
 
 if __name__ == "__main__":
