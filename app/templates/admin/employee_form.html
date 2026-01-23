@@ -13,13 +13,13 @@
                         <div class="col-md-6">
                             <label class="form-label">Имя <span class="text-danger">*</span></label>
                             <input type="text" name="first_name" class="form-control"
-                                   value="{{ employee.first_name if employee else '' }}" required>
+                                   value="{% if employee %}{{ employee.full_name.split()[0] if employee.full_name.split()|length > 0 else '' }}{% endif %}" required>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Фамилия <span class="text-danger">*</span></label>
                             <input type="text" name="last_name" class="form-control"
-                                   value="{{ employee.last_name if employee else '' }}" required>
+                                   value="{% if employee %}{{ employee.full_name.split()[1] if employee.full_name.split()|length > 1 else '' }}{% endif %}" required>
                         </div>
 
                         <div class="col-12">

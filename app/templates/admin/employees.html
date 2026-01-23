@@ -20,7 +20,12 @@
             <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
                     <div class="avatar me-3" style="width:56px;height:56px;font-size:1.5rem;">
-                        {{ emp.first_name[:1] | upper }}{{ emp.last_name[:1] | upper }}
+                        {% set names = emp.full_name.split() %}
+                        {% if names|length >= 2 %}
+                            {{ names[0][:1] | upper }}{{ names[1][:1] | upper }}
+                        {% else %}
+                            {{ emp.full_name[:2] | upper }}
+                        {% endif %}
                     </div>
                     <div>
                         <h5 class="mb-0">{{ emp.full_name }}</h5>

@@ -126,7 +126,7 @@ async def employees(request: Request):
     """Страница списка сотрудников."""
     async with get_session() as session:
         result = await session.execute(
-            select(Employee).order_by(Employee.last_name, Employee.first_name)
+            select(Employee).order_by(Employee.full_name)
         )
         employees_list = result.scalars().all()
 
