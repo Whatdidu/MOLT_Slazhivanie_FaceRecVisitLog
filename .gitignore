@@ -27,6 +27,9 @@ ENV/
 .DS_Store
 Thumbs.db
 
+# Local data
+data/
+
 # Database
 *.db
 *.sqlite
