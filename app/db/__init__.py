@@ -1,30 +1,32 @@
 """
-Database module exports.
+Модуль базы данных.
+
+Поддерживает async операции (основной режим) и sync для совместимости.
 """
+
+from app.db.models import Base, AttendanceLog, Employee, Embedding, EventType
 from app.db.session import (
-    Base,
     engine,
-    SessionLocal,
-    get_db,
+    async_session_maker,
     init_db,
-    close_db
+    close_db,
+    get_session,
+    get_db,
 )
-from app.db.base import BaseModel, TimestampMixin
-from app.db.models import Employee, Embedding, AttendanceLog
 
 __all__ = [
-    # Session management
+    # Base
     "Base",
-    "engine",
-    "SessionLocal",
-    "get_db",
-    "init_db",
-    "close_db",
-    # Base classes
-    "BaseModel",
-    "TimestampMixin",
     # Models
+    "AttendanceLog",
     "Employee",
     "Embedding",
-    "AttendanceLog",
+    "EventType",
+    # Session management
+    "engine",
+    "async_session_maker",
+    "init_db",
+    "close_db",
+    "get_session",
+    "get_db",
 ]

@@ -24,10 +24,10 @@ from app.core.exceptions import (
 )
 from app.core.tasks import start_background_tasks, stop_background_tasks
 from app.core.storage import get_storage_manager
-from app.api.gateway import router as gateway_router
-from app.modules.employees import router as employees_router
 from app.modules.attendance.router import router as attendance_router
 from app.modules.admin.router import router as admin_router
+from app.modules.employees.router import router as employees_router
+from app.modules.recognition.router import router as recognition_router
 from app.db import init_db, close_db
 from app.modules.recognition import init_recognition_service
 
@@ -140,22 +140,11 @@ async def get_info():
     }
 
 
-# Gateway router (прием изображений от камеры)
-app.include_router(gateway_router)
-
-# Employees router (управление сотрудниками)
-app.include_router(employees_router)
-
-# Attendance router (посещаемость)
+# Подключаем роутеры
 app.include_router(attendance_router)
-
-# Admin router (админ-панель)
 app.include_router(admin_router)
-
-# TODO: Подключение остальных роутеров модулей (будут добавлены по мере реализации)
-# from app.modules.recognition.router import router as recognition_router
-#
-# app.include_router(recognition_router, prefix="/api/v1/recognition", tags=["Recognition"])
+app.include_router(employees_router)
+app.include_router(recognition_router)
 
 
 if __name__ == "__main__":

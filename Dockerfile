@@ -3,9 +3,10 @@
 
 FROM python:3.11-slim as base
 
-# Установка системных зависимостей
+# Установка системных зависимостей (cmake нужен для сборки dlib)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    cmake \
     libpq-dev \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*

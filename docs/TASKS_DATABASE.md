@@ -57,6 +57,7 @@
 ## Фаза 4: Enrollment (регистрация сотрудников)
 
 - [x] **TASK-DB-013**: Реализовать сервис регистрации (`app/modules/employees/service.py`) - [#63](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/63)
+  - *Также: `app/modules/employees/enrollment.py` (Лиля, 22.01.2026)*
 - [x] **TASK-DB-014**: Интегрировать с модулем Recognition для создания эмбеддингов - [#64](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/64)
 - [x] **TASK-DB-015**: Реализовать сохранение фото во временное хранилище
 - [x] **TASK-DB-016**: Добавить endpoint для загрузки фото (`POST /api/v1/employees/enroll`) - [#65](https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog/issues/65)
