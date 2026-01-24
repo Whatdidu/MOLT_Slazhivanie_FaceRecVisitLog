@@ -2,6 +2,7 @@
 SQLAlchemy модели базы данных.
 """
 
+import struct
 from datetime import datetime
 from typing import Optional, List
 
@@ -110,6 +111,25 @@ class Embedding(Base):
 
     # Relationships
     employee = relationship("Employee", back_populates="embeddings")
+
+    @property
+    def vector(self) -> List[float]:
+        """Десериализация вектора из бинарных данных."""
+        if self.vector_blob is None:
+            return []
+        # Распаковываем как массив float (4 байта на число)
+        count = len(self.vector_blob) // 4
+        return list(struct.unpack(f'{count}f', self.vector_blob))
+
+    @vector.setter
+    def vector(self, value: List[float]) -> None:
+        """Сериализация вектора в бинарные данные."""
+        if value is None:
+            self.vector_blob = None
+            self.vector_dim = 0
+        else:
+            self.vector_blob = struct.pack(f'{len(value)}f', *value)
+            self.vector_dim = len(value)
 
     def __repr__(self):
         return f"<Embedding(id={self.id}, employee_id={self.employee_id}, model='{self.model_version}')>"
