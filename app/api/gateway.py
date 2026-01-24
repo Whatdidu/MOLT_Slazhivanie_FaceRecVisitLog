@@ -10,7 +10,7 @@ from typing import Optional
 
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile, status, Depends
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.logger import get_logger
@@ -128,7 +128,7 @@ def validate_image_dimensions(image_bytes: bytes, trace_id: str) -> tuple[int, i
 async def receive_snapshot(
     request: Request,
     file: UploadFile = File(..., description="Изображение с камеры (JPEG/PNG)"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Принимает снапшот от камеры для распознавания.
@@ -160,13 +160,13 @@ async def receive_snapshot(
     )
 
     # 1. Получить все embeddings из БД
-    embeddings_raw = employee_crud.get_all_embeddings(db)
+    embeddings_raw = await employee_crud.get_all_embeddings(db)
 
     # 2. Конвертировать в формат для Recognition
     embeddings_db = []
     for emp_id, vector in embeddings_raw:
         # Получить имя сотрудника
-        employee = employee_crud.get(db, emp_id)
+        employee = await employee_crud.get_by_id(db, emp_id)
         if employee:
             embeddings_db.append(
                 EmployeeEmbedding(

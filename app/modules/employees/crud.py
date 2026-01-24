@@ -1,8 +1,8 @@
 """
-CRUD operations for Employee model.
+CRUD operations for Employee model (async version).
 """
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 from typing import Optional
 
 from app.db.models import Employee, Embedding
@@ -10,10 +10,10 @@ from app.modules.employees.schemas import EmployeeCreate, EmployeeUpdate
 
 
 class EmployeeCRUD:
-    """CRUD operations for Employee model."""
+    """CRUD operations for Employee model (async)."""
 
     @staticmethod
-    def create(db: Session, employee_data: EmployeeCreate) -> Employee:
+    async def create(db: AsyncSession, employee_data: EmployeeCreate) -> Employee:
         """
         Create a new employee.
 
@@ -33,12 +33,12 @@ class EmployeeCRUD:
             department=employee_data.department,
         )
         db.add(employee)
-        db.commit()
-        db.refresh(employee)
+        await db.commit()
+        await db.refresh(employee)
         return employee
 
     @staticmethod
-    def get_by_id(db: Session, employee_id: int) -> Optional[Employee]:
+    async def get_by_id(db: AsyncSession, employee_id: int) -> Optional[Employee]:
         """
         Get employee by ID.
 
@@ -49,10 +49,13 @@ class EmployeeCRUD:
         Returns:
             Employee instance or None if not found
         """
-        return db.query(Employee).filter(Employee.id == employee_id).first()
+        result = await db.execute(
+            select(Employee).filter(Employee.id == employee_id)
+        )
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def get_by_email(db: Session, email: str) -> Optional[Employee]:
+    async def get_by_email(db: AsyncSession, email: str) -> Optional[Employee]:
         """
         Get employee by email.
 
@@ -63,11 +66,14 @@ class EmployeeCRUD:
         Returns:
             Employee instance or None if not found
         """
-        return db.query(Employee).filter(Employee.email == email).first()
+        result = await db.execute(
+            select(Employee).filter(Employee.email == email)
+        )
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def get_all(
-        db: Session,
+    async def get_all(
+        db: AsyncSession,
         skip: int = 0,
         limit: int = 100,
         only_active: bool = True
@@ -84,15 +90,17 @@ class EmployeeCRUD:
         Returns:
             List of employees
         """
-        query = db.query(Employee)
+        query = select(Employee)
 
         if only_active:
             query = query.filter(Employee.is_active == True)
 
-        return query.offset(skip).limit(limit).all()
+        query = query.offset(skip).limit(limit)
+        result = await db.execute(query)
+        return list(result.scalars().all())
 
     @staticmethod
-    def count(db: Session, only_active: bool = True) -> int:
+    async def count(db: AsyncSession, only_active: bool = True) -> int:
         """
         Count total number of employees.
 
@@ -103,16 +111,17 @@ class EmployeeCRUD:
         Returns:
             Total number of employees
         """
-        query = db.query(Employee)
+        query = select(func.count(Employee.id))
 
         if only_active:
             query = query.filter(Employee.is_active == True)
 
-        return query.count()
+        result = await db.execute(query)
+        return result.scalar() or 0
 
     @staticmethod
-    def update(
-        db: Session,
+    async def update(
+        db: AsyncSession,
         employee_id: int,
         employee_data: EmployeeUpdate
     ) -> Optional[Employee]:
@@ -127,7 +136,10 @@ class EmployeeCRUD:
         Returns:
             Updated employee instance or None if not found
         """
-        employee = db.query(Employee).filter(Employee.id == employee_id).first()
+        result = await db.execute(
+            select(Employee).filter(Employee.id == employee_id)
+        )
+        employee = result.scalar_one_or_none()
 
         if not employee:
             return None
@@ -137,12 +149,12 @@ class EmployeeCRUD:
         for field, value in update_data.items():
             setattr(employee, field, value)
 
-        db.commit()
-        db.refresh(employee)
+        await db.commit()
+        await db.refresh(employee)
         return employee
 
     @staticmethod
-    def delete(db: Session, employee_id: int) -> bool:
+    async def delete(db: AsyncSession, employee_id: int) -> bool:
         """
         Soft delete employee (set is_active=False).
 
@@ -153,17 +165,20 @@ class EmployeeCRUD:
         Returns:
             True if deleted, False if not found
         """
-        employee = db.query(Employee).filter(Employee.id == employee_id).first()
+        result = await db.execute(
+            select(Employee).filter(Employee.id == employee_id)
+        )
+        employee = result.scalar_one_or_none()
 
         if not employee:
             return False
 
         employee.is_active = False
-        db.commit()
+        await db.commit()
         return True
 
     @staticmethod
-    def hard_delete(db: Session, employee_id: int) -> bool:
+    async def hard_delete(db: AsyncSession, employee_id: int) -> bool:
         """
         Hard delete employee from database.
 
@@ -174,32 +189,38 @@ class EmployeeCRUD:
         Returns:
             True if deleted, False if not found
         """
-        employee = db.query(Employee).filter(Employee.id == employee_id).first()
+        result = await db.execute(
+            select(Employee).filter(Employee.id == employee_id)
+        )
+        employee = result.scalar_one_or_none()
 
         if not employee:
             return False
 
-        db.delete(employee)
-        db.commit()
+        await db.delete(employee)
+        await db.commit()
         return True
 
     @staticmethod
-    def get_all_embeddings(db: Session) -> list[tuple[int, list[float]]]:
+    async def get_all_embeddings(db: AsyncSession) -> list[tuple[int, list[float]]]:
         """
         Get all employee embeddings for recognition.
 
         Returns:
             List of tuples (employee_id, vector)
         """
-        embeddings = db.query(Embedding).join(Employee).filter(
-            Employee.is_active == True
-        ).all()
+        result = await db.execute(
+            select(Embedding).join(Employee).filter(
+                Employee.is_active == True
+            )
+        )
+        embeddings = result.scalars().all()
 
         return [(emb.employee_id, emb.vector) for emb in embeddings]
 
     @staticmethod
-    def get_embedding_by_employee_id(
-        db: Session,
+    async def get_embedding_by_employee_id(
+        db: AsyncSession,
         employee_id: int
     ) -> Optional[Embedding]:
         """
@@ -212,9 +233,10 @@ class EmployeeCRUD:
         Returns:
             Embedding instance or None if not found
         """
-        return db.query(Embedding).filter(
-            Embedding.employee_id == employee_id
-        ).first()
+        result = await db.execute(
+            select(Embedding).filter(Embedding.employee_id == employee_id)
+        )
+        return result.scalar_one_or_none()
 
 
 # Global instance

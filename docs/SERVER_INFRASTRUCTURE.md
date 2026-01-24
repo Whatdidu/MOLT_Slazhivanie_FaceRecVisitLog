@@ -1,39 +1,43 @@
 # Серверная инфраструктура SK-MOLT
 
-**Дата обновления:** 2026-01-23
+**Дата обновления:** 2026-01-24
 
 ---
 
-## Сервер SmartApe VPS
+## Yandex Cloud VM
 
 ### Доступы
 
 | Параметр | Значение |
 |----------|----------|
-| **IP адрес** | `109.172.9.137` |
-| **Домен** | `s1465303.smartape-vps.com` |
-| **SSH пользователь** | `root` |
-| **Пароль** | См. `.env` файл (`SMARTAPE_PASSWORD`) |
+| **IP адрес** | `158.160.62.149` |
+| **VM Name** | `beemos-api` |
+| **VM ID** | `fhm301iskprq0ur79j8c` |
+| **Zone** | `ru-central1-a` |
+| **SSH пользователь** | `yc-user` |
 
 ### Подключение
 
 ```bash
-ssh root@109.172.9.137
-# или
-ssh root@s1465303.smartape-vps.com
+# Через yc CLI (рекомендуется)
+yc compute ssh --id fhm301iskprq0ur79j8c --login yc-user
+
+# Напрямую по SSH
+ssh yc-user@158.160.62.149
 ```
 
 ---
 
 ## Характеристики сервера
 
-| Параметр | Значение | Статус для ML |
-|----------|----------|---------------|
-| **CPU** | 4 ядра Intel Xeon (Icelake) @ 2.0 GHz | ✅ Достаточно |
-| **RAM** | 2 GB (доступно ~1.3 GB) | ✅ Достаточно для dlib |
-| **Диск** | 20 GB SSD (свободно ~13 GB) | ✅ Достаточно |
-| **ОС** | Ubuntu 24.04.3 LTS (Noble Numbat) | ✅ OK |
-| **Docker** | v28.2.2 | ✅ OK |
+| Параметр | Значение |
+|----------|----------|
+| **Платформа** | Yandex Cloud Compute |
+| **ОС** | Ubuntu 22.04.5 LTS |
+| **RAM** | 4 GB |
+| **Disk** | 20 GB SSD |
+| **IP** | Статический |
+| **Docker** | v29.1.5 + Compose v5.0.2 |
 
 ---
 
@@ -41,10 +45,10 @@ ssh root@s1465303.smartape-vps.com
 
 ### Доступные провайдеры
 
-| Провайдер | RAM | Точность | Embedding | Для 2 GB VPS |
+| Провайдер | RAM | Точность | Embedding | Рекомендация |
 |-----------|-----|----------|-----------|--------------|
-| **dlib** (по умолчанию) | ~500 MB | 99.3% | 128-dim | ✅ **Да** |
-| mock | ~0 MB | — | — | ✅ Для тестов |
+| **dlib** (по умолчанию) | ~500 MB | 99.3% | 128-dim | ✅ Рекомендуется |
+| mock | ~0 MB | — | — | Для тестов |
 
 ### Переключение провайдера
 
@@ -54,47 +58,6 @@ RECOGNITION_PROVIDER=dlib   # Lightweight (рекомендуется)
 RECOGNITION_PROVIDER=mock   # Без ML (для тестирования)
 ```
 
-### Оценка RAM для dlib провайдера
-
-| Компонент | Потребление RAM |
-|-----------|-----------------|
-| face_recognition (dlib) | ~400-500 MB |
-| PostgreSQL | ~100-200 MB |
-| FastAPI + uvicorn | ~100-150 MB |
-| Другие сервисы на сервере | ~700 MB |
-| **ИТОГО** | **~1.3-1.5 GB** |
-| **Доступно на VPS** | **~1.3 GB** |
-| **Статус** | ✅ **Достаточно** |
-
----
-
-## Запущенные сервисы
-
-### Docker контейнеры
-
-| Контейнер | Порт | Проект | Статус |
-|-----------|------|--------|--------|
-| `sputnik-faceid-db` | 5433 | SK-MOLT (FaceID) | ✅ Healthy |
-| `sk_lk_payment_postgres` | 5432 | sk_lk_payment | ✅ Healthy |
-| `sk_lk_payment_postgrest` | 3000 (внутр.) | sk_lk_payment | ✅ Running |
-| `sk_lk_payment_nginx` | 8080 | sk_lk_payment | ⚠️ Unhealthy |
-| `watchtower` | — | Автообновление | ✅ Healthy |
-| `shadowbox` | — | Outline VPN | ✅ Running |
-
----
-
-## Сетевая конфигурация
-
-### Открытые порты
-
-| Порт | Сервис | Доступ |
-|------|--------|--------|
-| 22 | SSH | Внешний |
-| 5432 | PostgreSQL (sk_lk_payment) | Внешний |
-| 5433 | PostgreSQL (sputnik_faceid) | Внешний |
-| 8080 | Nginx (sk_lk_payment API) | Внешний |
-| 8000 | FastAPI (sputnik_faceid) | **Не запущен** |
-
 ---
 
 ## База данных Sputnik FaceID
@@ -103,7 +66,7 @@ RECOGNITION_PROVIDER=mock   # Без ML (для тестирования)
 
 ```bash
 # Connection string
-postgresql://sputnik:SputnikFace2024!Secure@109.172.9.137:5433/sputnik_faceid
+postgresql://sputnik:SputnikFace2024!Secure@158.160.62.149:5432/sputnik_faceid
 
 # Через Docker на сервере
 docker exec -it sputnik-faceid-db psql -U sputnik -d sputnik_faceid
@@ -113,11 +76,11 @@ docker exec -it sputnik-faceid-db psql -U sputnik -d sputnik_faceid
 
 | Параметр | Значение |
 |----------|----------|
-| Host | 109.172.9.137 |
-| Port | 5433 |
+| Host | 158.160.62.149 |
+| Port | 5432 |
 | Database | sputnik_faceid |
 | User | sputnik |
-| Password | См. `.env` (`SPUTNIK_DB_PASSWORD`) |
+| Password | См. `.env` (`DB_PASSWORD`) |
 
 ---
 
@@ -127,18 +90,16 @@ docker exec -it sputnik-faceid-db psql -U sputnik -d sputnik_faceid
 
 ```bash
 # 1. Подключиться к серверу
-ssh root@109.172.9.137
+ssh yc-user@158.160.62.149
 
-# 2. Клонировать репозиторий
-cd /opt
-git clone https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog.git sputnik-faceid
-cd sputnik-faceid
+# 2. Перейти в директорию проекта
+cd /opt/sputnik-faceid
 
-# 3. Создать .env файл
-cp .env.example .env
-nano .env  # Настроить переменные
+# 3. Обновить код
+git pull origin master
 
-# 4. Запустить через Docker Compose
+# 4. Перезапустить через Docker Compose
+docker compose down
 docker compose up -d
 
 # 5. Проверить статус
@@ -154,7 +115,7 @@ docker compose logs -f app
 
 ```bash
 # SSH на сервер
-ssh root@109.172.9.137
+ssh yc-user@158.160.62.149
 
 # Проверить RAM
 free -h
@@ -164,14 +125,34 @@ docker ps
 docker stats --no-stream
 ```
 
-### Health-check endpoints (после деплоя)
+### Health-check endpoints
 
 ```bash
 # API health
-curl http://109.172.9.137:8000/health
+curl http://158.160.62.149:8000/health
 
 # Database health
-curl http://109.172.9.137:8000/api/v1/info
+curl http://158.160.62.149:8000/api/v1/info
+```
+
+---
+
+## Yandex Cloud CLI
+
+### Полезные команды
+
+```bash
+# Список VM
+yc compute instance list --folder-id b1gk0154cjiik7qgvokr
+
+# Статус VM
+yc compute instance get fhm301iskprq0ur79j8c
+
+# Подключение по SSH
+yc compute ssh --id fhm301iskprq0ur79j8c --login yc-user
+
+# Логи VM
+yc compute instance get-serial-port-output fhm301iskprq0ur79j8c
 ```
 
 ---
@@ -180,6 +161,6 @@ curl http://109.172.9.137:8000/api/v1/info
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-01-24 | Миграция на Yandex Cloud (158.160.62.149) |
 | 2026-01-23 | Добавлен dlib провайдер для работы на 2 GB RAM |
 | 2026-01-22 | Первичный аудит сервера |
-| 2026-01-16 | Развернут PostgreSQL для sputnik_faceid (порт 5433) |

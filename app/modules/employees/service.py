@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.models import Employee, Embedding
@@ -51,7 +51,7 @@ class EmployeeService:
 
     async def enroll_employee(
         self,
-        db: Session,
+        db: AsyncSession,
         full_name: str,
         email: str,
         photo: bytes,
@@ -83,7 +83,7 @@ class EmployeeService:
             LowQualityPhotoError: If photo quality is too low
         """
         # Check email uniqueness
-        existing = employee_crud.get_by_email(db, email)
+        existing = await employee_crud.get_by_email(db, email)
         if existing:
             raise EmailAlreadyExistsError(f"Employee with email {email} already exists")
 
@@ -108,12 +108,12 @@ class EmployeeService:
             email=email,
             department=department,
         )
-        employee = employee_crud.create(db, employee_data)
+        employee = await employee_crud.create(db, employee_data)
 
         # Update photo path
         employee.photo_path = photo_path
-        db.commit()
-        db.refresh(employee)
+        await db.commit()
+        await db.refresh(employee)
 
         # Create embedding record
         embedding = Embedding(
@@ -122,14 +122,14 @@ class EmployeeService:
             model_version="arcface",
         )
         db.add(embedding)
-        db.commit()
-        db.refresh(embedding)
+        await db.commit()
+        await db.refresh(embedding)
 
         return employee, embedding
 
     async def update_employee_photo(
         self,
-        db: Session,
+        db: AsyncSession,
         employee_id: int,
         photo: bytes,
     ) -> Embedding:
@@ -149,7 +149,7 @@ class EmployeeService:
             NoFaceDetectedError: If no face detected
             LowQualityPhotoError: If quality too low
         """
-        employee = employee_crud.get_by_id(db, employee_id)
+        employee = await employee_crud.get_by_id(db, employee_id)
         if not employee:
             raise ValueError(f"Employee with ID {employee_id} not found")
 
@@ -174,9 +174,9 @@ class EmployeeService:
         employee.photo_path = photo_path
 
         # Delete old embedding
-        old_embedding = employee_crud.get_embedding_by_employee_id(db, employee_id)
+        old_embedding = await employee_crud.get_embedding_by_employee_id(db, employee_id)
         if old_embedding:
-            db.delete(old_embedding)
+            await db.delete(old_embedding)
 
         # Create new embedding
         embedding = Embedding(
@@ -185,8 +185,8 @@ class EmployeeService:
             model_version="arcface",
         )
         db.add(embedding)
-        db.commit()
-        db.refresh(embedding)
+        await db.commit()
+        await db.refresh(embedding)
 
         return embedding
 
@@ -231,40 +231,40 @@ class EmployeeService:
 
     # Convenience wrappers for CRUD operations
 
-    def get_employee(self, db: Session, employee_id: int) -> Optional[Employee]:
+    async def get_employee(self, db: AsyncSession, employee_id: int) -> Optional[Employee]:
         """Get employee by ID."""
-        return employee_crud.get_by_id(db, employee_id)
+        return await employee_crud.get_by_id(db, employee_id)
 
-    def get_employee_by_email(self, db: Session, email: str) -> Optional[Employee]:
+    async def get_employee_by_email(self, db: AsyncSession, email: str) -> Optional[Employee]:
         """Get employee by email."""
-        return employee_crud.get_by_email(db, email)
+        return await employee_crud.get_by_email(db, email)
 
-    def list_employees(
+    async def list_employees(
         self,
-        db: Session,
+        db: AsyncSession,
         skip: int = 0,
         limit: int = 100,
         only_active: bool = True,
     ) -> list[Employee]:
         """Get list of employees."""
-        return employee_crud.get_all(db, skip=skip, limit=limit, only_active=only_active)
+        return await employee_crud.get_all(db, skip=skip, limit=limit, only_active=only_active)
 
-    def update_employee(
+    async def update_employee(
         self,
-        db: Session,
+        db: AsyncSession,
         employee_id: int,
         data: EmployeeUpdate,
     ) -> Optional[Employee]:
         """Update employee data."""
-        return employee_crud.update(db, employee_id, data)
+        return await employee_crud.update(db, employee_id, data)
 
-    def delete_employee(self, db: Session, employee_id: int) -> bool:
+    async def delete_employee(self, db: AsyncSession, employee_id: int) -> bool:
         """Soft delete employee."""
-        return employee_crud.delete(db, employee_id)
+        return await employee_crud.delete(db, employee_id)
 
-    def get_all_embeddings(self, db: Session) -> list[tuple[int, list[float]]]:
+    async def get_all_embeddings(self, db: AsyncSession) -> list[tuple[int, list[float]]]:
         """Get all embeddings for recognition."""
-        return employee_crud.get_all_embeddings(db)
+        return await employee_crud.get_all_embeddings(db)
 
 
 # Singleton instance

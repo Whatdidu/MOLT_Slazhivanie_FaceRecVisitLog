@@ -1,24 +1,29 @@
 # Инструкция по деплою Sputnik FaceID
 
-**Дата:** 2026-01-23
+**Дата:** 2026-01-24
 
 ---
 
-## Данные сервера
+## Данные сервера (Yandex Cloud)
 
 | Параметр | Значение |
 |----------|----------|
-| **IP** | `109.172.9.137` |
-| **Домен** | `s1465303.smartape-vps.com` |
-| **SSH** | `ssh root@109.172.9.137` |
-| **Пароль** | См. `.env` файл в корне проекта (`SMARTAPE_PASSWORD`) |
+| **IP** | `158.160.62.149` |
+| **VM Name** | `beemos-api` |
+| **VM ID** | `fhm301iskprq0ur79j8c` |
+| **SSH** | `ssh yc-user@158.160.62.149` |
+| **Zone** | `ru-central1-a` |
 
 ---
 
 ## Шаг 1: Подключиться к серверу
 
 ```bash
-ssh root@109.172.9.137
+# Через yc CLI (рекомендуется)
+yc compute ssh --id fhm301iskprq0ur79j8c --login yc-user
+
+# Или напрямую
+ssh yc-user@158.160.62.149
 ```
 
 ---
@@ -27,7 +32,7 @@ ssh root@109.172.9.137
 
 ```bash
 cd /opt
-git clone https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog.git sputnik-faceid
+sudo git clone https://github.com/Whatdidu/MOLT_Slazhivanie_FaceRecVisitLog.git sputnik-faceid
 cd sputnik-faceid/deploy
 ```
 
@@ -43,7 +48,12 @@ nano .env
 **Обязательно заполнить:**
 
 ```env
-SPUTNIK_DB_PASSWORD=SputnikFace2024!Secure
+DB_HOST=158.160.62.149
+DB_PORT=5432
+DB_NAME=sputnik_faceid
+DB_USER=sputnik
+DB_PASSWORD=SputnikFace2024!Secure
+DATABASE_URL=postgresql://sputnik:SputnikFace2024!Secure@158.160.62.149:5432/sputnik_faceid
 RECOGNITION_PROVIDER=dlib
 DEBUG=false
 ```
@@ -96,12 +106,12 @@ curl http://localhost/health
 
 | URL | Описание |
 |-----|----------|
-| `http://109.172.9.137/` | Админ-панель |
-| `http://109.172.9.137/health` | Health check |
-| `http://109.172.9.137/docs` | Swagger API (если DEBUG=true) |
-| `http://109.172.9.137/api/v1/employees/` | API сотрудников |
-| `http://109.172.9.137/api/v1/attendance/` | API посещаемости |
-| `http://109.172.9.137/api/v1/recognition/` | API распознавания |
+| `http://158.160.62.149/` | Админ-панель |
+| `http://158.160.62.149/health` | Health check |
+| `http://158.160.62.149/docs` | Swagger API (если DEBUG=true) |
+| `http://158.160.62.149/api/v1/employees/` | API сотрудников |
+| `http://158.160.62.149/api/v1/attendance/` | API посещаемости |
+| `http://158.160.62.149/api/v1/recognition/` | API распознавания |
 
 ---
 
@@ -143,12 +153,31 @@ docker exec -it sputnik-faceid-db psql -U sputnik -d sputnik_faceid
 
 ---
 
+## Yandex Cloud CLI
+
+### Полезные команды
+
+```bash
+# Список VM
+yc compute instance list --folder-id b1gk0154cjiik7qgvokr
+
+# Статус VM
+yc compute instance get fhm301iskprq0ur79j8c
+
+# Перезагрузить VM
+yc compute instance restart fhm301iskprq0ur79j8c
+
+# Serial console (логи загрузки)
+yc compute instance get-serial-port-output fhm301iskprq0ur79j8c
+```
+
+---
+
 ## Важная информация
 
-- Docker уже установлен на сервере (v28.2.2)
-- PostgreSQL уже работает на порту 5433
-- Используется **dlib** провайдер распознавания (работает на 2GB RAM)
-- Сервер: 4 ядра CPU, 2GB RAM, 20GB SSD
+- Платформа: Yandex Cloud Compute
+- База данных: PostgreSQL на порту 5432
+- Провайдер распознавания: **dlib** (работает на серверах с ограниченной RAM)
 
 ---
 
