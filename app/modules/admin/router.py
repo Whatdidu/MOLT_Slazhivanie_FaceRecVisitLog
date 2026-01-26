@@ -19,7 +19,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from sqlalchemy import select, func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.db import get_session, Employee
 from app.db.session import get_db
@@ -124,9 +124,13 @@ async def attendance(
 @router.get("/employees", response_class=HTMLResponse)
 async def employees(request: Request):
     """Страница списка сотрудников."""
+    from app.db.models import Embedding
+
     async with get_session() as session:
         result = await session.execute(
-            select(Employee).order_by(Employee.full_name)
+            select(Employee)
+            .options(selectinload(Employee.embeddings))
+            .order_by(Employee.full_name)
         )
         employees_list = result.scalars().all()
 

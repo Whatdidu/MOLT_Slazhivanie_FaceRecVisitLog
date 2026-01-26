@@ -73,6 +73,11 @@ class Employee(Base):
         cascade="all, delete-orphan"
     )
 
+    @property
+    def has_embedding(self) -> bool:
+        """Проверяет, есть ли у сотрудника загруженный вектор лица."""
+        return len(self.embeddings) > 0
+
     def __repr__(self):
         return f"<Employee(id={self.id}, name='{self.full_name}', email='{self.email}')>"
 

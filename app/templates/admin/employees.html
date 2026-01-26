@@ -38,11 +38,21 @@
                     {{ emp.department or 'Не указан' }}
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 d-flex gap-2 flex-wrap">
                     {% if emp.is_active %}
                     <span class="badge bg-success">Активен</span>
                     {% else %}
                     <span class="badge bg-secondary">Неактивен</span>
+                    {% endif %}
+
+                    {% if emp.has_embedding %}
+                    <span class="badge bg-info" title="Сотрудник может быть распознан системой">
+                        <i class="bi bi-check-circle me-1"></i>Вектор
+                    </span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark" title="Загрузите фото для распознавания">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Нет вектора
+                    </span>
                     {% endif %}
                 </div>
 
