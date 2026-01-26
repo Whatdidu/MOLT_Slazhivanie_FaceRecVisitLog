@@ -11,6 +11,8 @@ services:
     restart: unless-stopped
     ports:
       - "${PORT:-8000}:8000"
+      - "2121:2121"           # FTP command port
+      - "60000-60010:60000-60010"  # FTP passive mode ports
     environment:
       - APP_NAME=${APP_NAME:-SputnikFaceID}
       - APP_VERSION=${APP_VERSION:-0.1.0}
@@ -27,8 +29,17 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - STATIC_PATH=/app/app/static
       - DEBUG_PHOTOS_TTL_DAYS=${DEBUG_PHOTOS_TTL_DAYS:-7}
+      # FTP Server settings
+      - FTP_ENABLED=${FTP_ENABLED:-true}
+      - FTP_HOST=0.0.0.0
+      - FTP_PORT=2121
+      - FTP_USER=${FTP_USER:-camera}
+      - FTP_PASSWORD=${FTP_PASSWORD:-camera123}
+      - FTP_SNAPSHOTS_DIR=/app/snapshots
+      - FTP_PASSIVE_ADDRESS=${FTP_PASSIVE_ADDRESS:-}
     volumes:
       - static_data:/app/app/static
+      - snapshots_data:/app/snapshots
     depends_on:
       db:
         condition: service_healthy
@@ -73,3 +84,5 @@ volumes:
     name: sputnik-faceid-postgres-data
   static_data:
     name: sputnik-faceid-static-data
+  snapshots_data:
+    name: sputnik-faceid-snapshots
