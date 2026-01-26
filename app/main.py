@@ -28,6 +28,7 @@ from app.modules.attendance.router import router as attendance_router
 from app.modules.admin.router import router as admin_router
 from app.modules.employees.router import router as employees_router
 from app.modules.recognition.router import router as recognition_router
+from app.api.gateway import router as gateway_router
 from app.db import init_db, close_db
 from app.modules.recognition import init_recognition_service
 
@@ -145,6 +146,7 @@ app.include_router(attendance_router)
 app.include_router(admin_router)
 app.include_router(employees_router)
 app.include_router(recognition_router)
+app.include_router(gateway_router)
 
 
 if __name__ == "__main__":
