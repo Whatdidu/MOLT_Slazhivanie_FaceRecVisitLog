@@ -50,6 +50,25 @@ class Settings(BaseSettings):
     # - mock: без ML, для тестирования
     recognition_provider: str = "dlib"
 
+    # Camera settings
+    camera_ip: str = "192.168.31.156"
+    camera_user: str = "admin"
+    camera_password: str = ""
+    camera_rtsp_port: int = 554
+    camera_http_port: int = 80
+    camera_event_port: int = 8091  # TCP port for alarm events
+    camera_enabled: bool = True
+    camera_snapshots_dir: str = "snapshots"
+
+    # FTP Server for camera snapshots
+    ftp_enabled: bool = True
+    ftp_host: str = "0.0.0.0"
+    ftp_port: int = 2121
+    ftp_user: str = "camera"
+    ftp_password: str = "camera123"
+    ftp_snapshots_dir: str = "snapshots"
+    ftp_passive_address: str = ""  # External IP for passive mode (set in .env for cloud)
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -275,6 +275,32 @@ class EmployeeCRUD:
         )
         return result.scalar_one_or_none()
 
+    @staticmethod
+    async def get_employees_with_embeddings(
+        db: AsyncSession,
+        only_active: bool = True
+    ) -> list[tuple[Employee, Embedding]]:
+        """
+        Get all employees with their embeddings.
+
+        Args:
+            db: Database session
+            only_active: Filter only active employees
+
+        Returns:
+            List of tuples (employee, embedding)
+        """
+        query = (
+            select(Employee, Embedding)
+            .join(Embedding, Employee.id == Embedding.employee_id)
+        )
+
+        if only_active:
+            query = query.filter(Employee.is_active == True)
+
+        result = await db.execute(query)
+        return [(row[0], row[1]) for row in result.all()]
+
 
 # Global instance
 employee_crud = EmployeeCRUD()

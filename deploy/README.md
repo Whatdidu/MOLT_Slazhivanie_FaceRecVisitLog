@@ -114,6 +114,23 @@ cp /path/to/privkey.pem nginx/ssl/
 | Nginx  | 80, 443    | 80, 443 |
 | DB     | 5432       | -       |
 
+### Интеграция с IP камерой
+
+Приложение подключается к камере по TCP (порт 8091) и слушает события.
+При получении alarm-события делает RTSP снапшот и отправляет на распознавание.
+
+Настройки камеры в `.env`:
+```
+CAMERA_ENABLED=true
+CAMERA_IP=192.168.x.x
+CAMERA_USER=admin
+CAMERA_PASSWORD=xxx
+CAMERA_RTSP_PORT=554
+CAMERA_EVENT_PORT=8091
+```
+
+**Важно:** Камера и сервер должны быть в одной сети или иметь VPN/туннель.
+
 ## Endpoints
 
 - `http://your-server/` — Админ-панель

@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libsm6 \
     libice6 \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -51,8 +52,8 @@ COPY alembic/ ./alembic/
 COPY alembic.ini ./alembic.ini
 COPY .env.example ./.env.example
 
-# Создание директории для статических файлов
-RUN mkdir -p /app/app/static/debug_photos
+# Создание директорий для статических файлов и снапшотов
+RUN mkdir -p /app/app/static/debug_photos /app/snapshots
 
 # Создание non-root пользователя для безопасности
 RUN useradd --create-home --shell /bin/bash appuser && \

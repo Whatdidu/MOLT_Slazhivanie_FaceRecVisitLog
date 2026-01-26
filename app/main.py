@@ -31,6 +31,7 @@ from app.modules.recognition.router import router as recognition_router
 from app.api.gateway import router as gateway_router
 from app.db import init_db, close_db
 from app.modules.recognition import init_recognition_service
+from app.modules.camera import start_ftp_server, stop_ftp_server, process_snapshot
 
 logger = get_logger(__name__)
 
@@ -70,10 +71,22 @@ async def lifespan(app: FastAPI):
     await start_background_tasks()
     logger.info("Background tasks started")
 
+    # Start FTP server for camera snapshots
+    try:
+        await start_ftp_server(on_file_callback=process_snapshot)
+        logger.info("FTP server for camera snapshots started")
+    except Exception as e:
+        logger.error(f"Failed to start FTP server: {e}")
+        logger.warning("Application will continue without FTP server")
+
     yield
 
     # Shutdown
     logger.info("Shutting down application")
+
+    # Stop FTP server
+    await stop_ftp_server()
+    logger.info("FTP server stopped")
 
     # Stop background tasks
     await stop_background_tasks()
