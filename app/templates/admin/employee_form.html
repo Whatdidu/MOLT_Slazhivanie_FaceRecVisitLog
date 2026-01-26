@@ -69,9 +69,16 @@
                         <div class="col-12">
                             <hr>
                             <div class="d-flex justify-content-between">
-                                <a href="/admin/employees" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-1"></i>Назад
-                                </a>
+                                <div>
+                                    <a href="/admin/employees" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-1"></i>Назад
+                                    </a>
+                                    {% if employee %}
+                                    <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                        <i class="bi bi-trash me-1"></i>Удалить
+                                    </button>
+                                    {% endif %}
+                                </div>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-check-lg me-1"></i>
                                     {% if employee %}Сохранить{% else %}Создать{% endif %}
@@ -84,4 +91,54 @@
         </div>
     </div>
 </div>
+
+{% if employee %}
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Удаление сотрудника
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить сотрудника <strong>{{ employee.full_name }}</strong>?</p>
+                <p class="text-muted small mb-0">
+                    Сотрудник будет деактивирован и не сможет распознаваться системой.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="bi bi-trash me-1"></i>Удалить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirmDelete').addEventListener('click', async function() {
+    try {
+        const response = await fetch('/api/v1/employees/{{ employee.id }}', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            window.location.href = '/admin/employees';
+        } else {
+            const data = await response.json();
+            alert('Ошибка удаления: ' + (data.detail || 'Неизвестная ошибка'));
+        }
+    } catch (error) {
+        alert('Ошибка сети: ' + error.message);
+    }
+});
+</script>
+{% endif %}
 {% endblock %}
