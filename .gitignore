@@ -23,6 +23,9 @@ ENV/
 *~
 .claude/
 
+# Infrastructure secrets
+infra/ssh/
+
 # OS
 .DS_Store
 Thumbs.db
