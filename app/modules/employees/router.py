@@ -187,18 +187,29 @@ async def list_employees(
     - **skip**: Number of records to skip (default: 0)
     - **limit**: Maximum number of records to return (default: 100, max: 500)
     - **only_active**: Filter only active employees (default: true)
+
+    Response includes `has_embedding` field indicating if employee has face embedding for recognition.
     """
     # Limit max value
     limit = min(limit, 500)
 
-    employees = await employee_crud.get_all(db, skip=skip, limit=limit, only_active=only_active)
+    employees_with_status = await employee_crud.get_all_with_embedding_status(
+        db, skip=skip, limit=limit, only_active=only_active
+    )
     total = await employee_crud.count(db, only_active=only_active)
+
+    # Build response with has_embedding field
+    items = []
+    for employee, has_embedding in employees_with_status:
+        emp_response = EmployeeResponse.model_validate(employee)
+        emp_response.has_embedding = has_embedding
+        items.append(emp_response)
 
     return EmployeeListResponse(
         total=total,
         skip=skip,
         limit=limit,
-        items=employees
+        items=items
     )
 
 

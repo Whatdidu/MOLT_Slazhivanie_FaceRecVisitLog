@@ -82,6 +82,10 @@ class EmployeeResponse(EmployeeBase):
     )
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
+    has_embedding: Optional[bool] = Field(
+        default=None,
+        description="Whether the employee has a face embedding for recognition"
+    )
 
     model_config = ConfigDict(from_attributes=True)
 

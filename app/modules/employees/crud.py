@@ -2,7 +2,7 @@
 CRUD operations for Employee model (async version).
 """
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, exists
 from typing import Optional
 
 from app.db.models import Employee, Embedding
@@ -98,6 +98,43 @@ class EmployeeCRUD:
         query = query.offset(skip).limit(limit)
         result = await db.execute(query)
         return list(result.scalars().all())
+
+    @staticmethod
+    async def get_all_with_embedding_status(
+        db: AsyncSession,
+        skip: int = 0,
+        limit: int = 100,
+        only_active: bool = True
+    ) -> list[tuple[Employee, bool]]:
+        """
+        Get list of employees with embedding status.
+
+        Args:
+            db: Database session
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            only_active: Filter only active employees
+
+        Returns:
+            List of tuples (employee, has_embedding)
+        """
+        # Subquery to check if embedding exists
+        embedding_exists = (
+            select(Embedding.id)
+            .where(Embedding.employee_id == Employee.id)
+            .correlate(Employee)
+            .exists()
+        )
+
+        query = select(Employee, embedding_exists.label("has_embedding"))
+
+        if only_active:
+            query = query.filter(Employee.is_active == True)
+
+        query = query.offset(skip).limit(limit)
+        result = await db.execute(query)
+
+        return [(row[0], row[1]) for row in result.all()]
 
     @staticmethod
     async def count(db: AsyncSession, only_active: bool = True) -> int:
