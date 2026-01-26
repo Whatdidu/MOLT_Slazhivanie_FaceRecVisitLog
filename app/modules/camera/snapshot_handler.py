@@ -11,7 +11,7 @@ from app.core.logger import get_logger
 from app.modules.recognition import get_recognition_service
 from app.modules.recognition.models import EmployeeEmbedding
 from app.modules.employees.crud import employee_crud
-from app.db import get_db_session
+from app.db import get_session
 
 logger = get_logger(__name__)
 
@@ -47,7 +47,7 @@ async def process_snapshot(file_path: str):
             return
 
         # Получаем сотрудников с эмбеддингами из БД
-        async with get_db_session() as db:
+        async with get_session() as db:
             employees_with_embeddings = await employee_crud.get_employees_with_embeddings(db)
 
             if not employees_with_embeddings:
