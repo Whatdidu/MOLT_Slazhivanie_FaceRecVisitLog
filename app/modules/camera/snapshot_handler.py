@@ -5,6 +5,7 @@
 
 import asyncio
 import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -14,12 +15,36 @@ from app.modules.recognition.models import EmployeeEmbedding
 from app.modules.employees.crud import employee_crud
 from app.modules.attendance.service import get_attendance_service
 from app.db import get_session
+from app.core.config import settings
 
 logger = get_logger(__name__)
 
 # Семафор для ограничения параллельной обработки снапшотов
 # Максимум 5 одновременных обработок, чтобы не перегружать БД
 _processing_semaphore = asyncio.Semaphore(5)
+
+# Таблица транслитерации кириллицы в латиницу
+_TRANSLIT_TABLE = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+    'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+    'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+    'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+    'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+    'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'Yo',
+    'Ж': 'Zh', 'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M',
+    'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U',
+    'Ф': 'F', 'Х': 'Kh', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Sch',
+    'Ъ': '', 'Ы': 'Y', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya',
+    ' ': '_',
+}
+
+
+def transliterate(text: str) -> str:
+    """Транслитерирует кириллицу в латиницу."""
+    result = []
+    for char in text:
+        result.append(_TRANSLIT_TABLE.get(char, char))
+    return ''.join(result)
 
 
 async def process_snapshot(file_path: str):
@@ -29,7 +54,10 @@ async def process_snapshot(file_path: str):
     1. Читает изображение
     2. Запускает распознавание лица
     3. Логирует результат (match/unknown/no_face)
-    4. Опционально: записывает в attendance
+    4. Обрабатывает файл в зависимости от результата:
+       - MATCH: переименовывает и перемещает в /recognized/
+       - UNKNOWN/LOW_CONFIDENCE: оставляет как есть
+       - NO_FACE: удаляет
 
     Args:
         file_path: Путь к файлу снапшота
@@ -50,6 +78,7 @@ async def _process_snapshot_internal(file_path: str):
 
         if not image_data:
             logger.warning(f"Empty snapshot file: {file_path}")
+            _delete_snapshot(file_path)
             return
 
         # Получаем сервис распознавания
@@ -88,23 +117,28 @@ async def _process_snapshot_internal(file_path: str):
             # Логируем результат
             _log_recognition_result(result, file_path)
 
-            # Записываем в attendance при match
+            # Обрабатываем файл в зависимости от результата
             if result.status == "match" and result.person_id:
+                # Записываем в attendance
                 await _record_attendance(
                     employee_id=int(result.person_id),
                     confidence=result.confidence,
                     trace_id=Path(file_path).stem,
                 )
+                # Перемещаем в папку recognized с новым именем
+                _move_to_recognized(file_path, result.person_name, result.confidence)
+
+            elif result.status == "no_face":
+                # Удаляем фото без лица
+                _delete_snapshot(file_path)
+
+            # UNKNOWN и LOW_CONFIDENCE - оставляем как есть для анализа
+
 
     except FileNotFoundError:
         logger.error(f"Snapshot file not found: {file_path}")
     except Exception as e:
         logger.error(f"Error processing snapshot {file_path}: {e}", exc_info=True)
-    finally:
-        # Опционально: удаляем обработанный файл
-        # TODO: включить после отладки
-        # _cleanup_snapshot(file_path)
-        pass
 
 
 def _log_recognition_result(result, file_path: str):
@@ -163,20 +197,41 @@ async def _record_attendance(employee_id: int, confidence: float, trace_id: str)
         logger.error(f"Failed to record attendance for employee {employee_id}: {e}")
 
 
-def _cleanup_snapshot(file_path: str, keep_files: bool = False):
+def _move_to_recognized(file_path: str, person_name: str, confidence: float):
     """
-    Удаляет обработанный снапшот.
+    Перемещает распознанный снапшот в папку recognized.
 
     Args:
-        file_path: Путь к файлу
-        keep_files: Если True, файлы не удаляются (для отладки)
+        file_path: Исходный путь к файлу
+        person_name: Имя распознанного сотрудника
+        confidence: Уверенность распознавания
     """
-    if keep_files:
-        return
+    try:
+        # Создаём папку recognized
+        recognized_dir = Path(settings.ftp_snapshots_dir) / "recognized"
+        recognized_dir.mkdir(parents=True, exist_ok=True)
 
+        # Формируем новое имя файла: Imya_Familiya_20260127_143052_58.jpg
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        confidence_pct = int(confidence * 100)
+        name_translit = transliterate(person_name)
+        new_filename = f"{name_translit}_{timestamp}_{confidence_pct}.jpg"
+
+        new_path = recognized_dir / new_filename
+
+        # Перемещаем файл
+        shutil.move(file_path, new_path)
+        logger.info(f"Moved recognized snapshot to: {new_path}")
+
+    except Exception as e:
+        logger.error(f"Failed to move snapshot {file_path}: {e}")
+
+
+def _delete_snapshot(file_path: str):
+    """Удаляет снапшот."""
     try:
         if os.path.exists(file_path):
             os.remove(file_path)
-            logger.debug(f"Cleaned up snapshot: {file_path}")
+            logger.debug(f"Deleted snapshot: {file_path}")
     except Exception as e:
-        logger.warning(f"Failed to cleanup snapshot {file_path}: {e}")
+        logger.warning(f"Failed to delete snapshot {file_path}: {e}")
