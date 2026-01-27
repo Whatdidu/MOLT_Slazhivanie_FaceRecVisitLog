@@ -21,7 +21,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session, selectinload
 
-from app.db import get_session, Employee
+from app.db import get_session, Employee, Embedding
 from app.db.session import get_db
 from app.modules.attendance.service import get_attendance_service
 from app.modules.attendance.models import EventType
@@ -31,6 +31,7 @@ from app.modules.employees.service import (
     NoFaceDetectedError,
     LowQualityPhotoError,
 )
+from app.modules.recognition import get_recognition_service
 from app.core.storage import get_storage_manager
 from app.core.tasks import get_task_manager
 
@@ -124,8 +125,6 @@ async def attendance(
 @router.get("/employees", response_class=HTMLResponse)
 async def employees(request: Request):
     """Страница списка сотрудников."""
-    from app.db.models import Embedding
-
     async with get_session() as session:
         result = await session.execute(
             select(Employee)
@@ -227,6 +226,112 @@ async def view_employee(request: Request, employee_id: int):
         "active_page": "employees",
         "employee": employee,
         "stats": stats,
+    })
+
+
+@router.post("/employees/{employee_id}", response_class=HTMLResponse)
+async def update_employee(
+    request: Request,
+    employee_id: int,
+    first_name: str = Form(...),
+    last_name: str = Form(...),
+    department: str = Form(None),
+    photo: UploadFile = File(None),
+    is_active: bool = Form(False),
+    db: Session = Depends(get_db),
+):
+    """Обновление сотрудника с возможностью загрузки нового фото."""
+    error = None
+    success = None
+
+    async with get_session() as session:
+        result = await session.execute(
+            select(Employee).where(Employee.id == employee_id)
+        )
+        employee = result.scalar_one_or_none()
+
+        if not employee:
+            return RedirectResponse(url="/admin/employees", status_code=303)
+
+        try:
+            # Обновляем базовые данные
+            full_name = f"{first_name} {last_name}"
+            employee.full_name = full_name
+            employee.department = department
+            employee.is_active = is_active
+
+            # Если загружено новое фото - создаём новый эмбеддинг
+            if photo and photo.filename:
+                photo_bytes = await photo.read()
+                if photo_bytes:
+                    # Используем EmployeeService для создания эмбеддинга
+                    emp_service = get_employee_service()
+
+                    # Удаляем старый эмбеддинг
+                    old_embeddings = (await session.execute(
+                        select(Embedding).where(Embedding.employee_id == employee_id)
+                    )).scalars().all()
+                    for emb in old_embeddings:
+                        await session.delete(emb)
+
+                    # Создаём новый эмбеддинг
+                    recognition_service = get_recognition_service()
+                    embedding_result = await recognition_service.create_embedding(photo_bytes)
+
+                    if not embedding_result.face_detected:
+                        raise NoFaceDetectedError("Лицо не обнаружено на фото")
+
+                    if embedding_result.face_quality < 0.3:
+                        raise LowQualityPhotoError(f"Качество фото слишком низкое: {embedding_result.face_quality:.0%}")
+
+                    # Сохраняем новый эмбеддинг
+                    new_embedding = Embedding(
+                        employee_id=employee_id,
+                        vector=embedding_result.embedding,
+                        model_version="dlib-face_recognition-1.3.0",
+                    )
+                    session.add(new_embedding)
+
+                    success = "Сотрудник обновлён, новое фото загружено"
+                else:
+                    success = "Сотрудник обновлён"
+            else:
+                success = "Сотрудник обновлён"
+
+            await session.commit()
+            await session.refresh(employee)
+
+        except NoFaceDetectedError:
+            error = "Лицо не обнаружено на фото. Загрузите фото с четким изображением лица."
+            await session.rollback()
+        except LowQualityPhotoError as e:
+            error = str(e)
+            await session.rollback()
+        except Exception as e:
+            error = f"Ошибка при обновлении: {str(e)}"
+            await session.rollback()
+
+    # Получаем обновлённые данные
+    async with get_session() as session:
+        result = await session.execute(
+            select(Employee).where(Employee.id == employee_id)
+        )
+        employee = result.scalar_one_or_none()
+
+    service = get_attendance_service()
+    stats = await service.get_attendance_stats(
+        start_date=date.today() - timedelta(days=30),
+        end_date=date.today(),
+        employee_id=employee_id,
+    )
+
+    return templates.TemplateResponse("admin/employee_form.html", {
+        "request": request,
+        "active_page": "employees",
+        "employee": employee,
+        "stats": stats,
+        "error": error,
+        "success": success,
     })
 
 
