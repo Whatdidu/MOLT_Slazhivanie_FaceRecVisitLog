@@ -109,7 +109,7 @@ def _log_recognition_result(result, file_path: str):
             f"file: {filename}"
         )
     elif result.status == "no_face":
-        logger.debug(f"[NO_FACE] No face detected in {filename}")
+        logger.info(f"[NO_FACE] No face detected in {filename}")
     elif result.status == "unknown":
         logger.info(f"[UNKNOWN] Unknown person in {filename}")
     else:
