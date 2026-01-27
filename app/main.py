@@ -125,6 +125,9 @@ app.add_middleware(
 # Static files (debug photos)
 app.mount("/static", StaticFiles(directory=settings.static_path), name="static")
 
+# Snapshots directory for viewing camera snapshots
+app.mount("/snapshots", StaticFiles(directory=settings.ftp_snapshots_dir), name="snapshots")
+
 
 # Root endpoint
 @app.get("/", tags=["System"])
