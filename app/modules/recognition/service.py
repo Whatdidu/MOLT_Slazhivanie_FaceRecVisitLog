@@ -24,10 +24,10 @@ from .providers.base import BaseFaceProvider
 
 
 # Пороги уверенности (для Euclidean distance: confidence = 1 - distance)
-# distance < 0.4 → confidence > 0.6 → "match"
-# distance 0.4-0.6 → confidence 0.4-0.6 → "low_confidence"
+# distance < 0.51 → confidence > 0.49 → "match"
+# distance 0.51-0.6 → confidence 0.4-0.49 → "low_confidence"
 # distance > 0.6 → confidence < 0.4 → "unknown"
-THRESHOLD_MATCH = 0.60
+THRESHOLD_MATCH = 0.49
 THRESHOLD_LOW_CONFIDENCE = 0.40
 
 # Порог евклидова расстояния (стандарт для dlib: 0.6)
