@@ -18,6 +18,7 @@ services:
     expose:
       - "8000"
     environment:
+      - TZ=Europe/Moscow
       - APP_NAME=${APP_NAME:-SputnikFaceID}
       - APP_VERSION=${APP_VERSION:-0.1.0}
       - DEBUG=false
@@ -75,6 +76,7 @@ services:
     container_name: sputnik-faceid-db
     restart: always
     environment:
+      - TZ=Europe/Moscow
       - POSTGRES_USER=${SPUTNIK_DB_USER:-sputnik}
       - POSTGRES_PASSWORD=${SPUTNIK_DB_PASSWORD:-sputnik_password}
       - POSTGRES_DB=${SPUTNIK_DB_NAME:-sputnik_faceid}
