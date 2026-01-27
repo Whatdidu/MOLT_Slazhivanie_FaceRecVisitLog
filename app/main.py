@@ -15,7 +15,7 @@ from fastapi.responses import RedirectResponse
 
 from app.core.config import settings
 from app.core.logger import get_logger, setup_logging
-from app.core.middleware import TraceIDMiddleware
+from app.core.middleware import TraceIDMiddleware, AuthMiddleware
 from app.core.exceptions import (
     AppException,
     app_exception_handler,
@@ -112,6 +112,9 @@ app.add_exception_handler(Exception, generic_exception_handler)
 
 # Trace ID Middleware (должен быть добавлен первым)
 app.add_middleware(TraceIDMiddleware)
+
+# Auth Middleware для защиты админки
+app.add_middleware(AuthMiddleware)
 
 # CORS Middleware
 app.add_middleware(

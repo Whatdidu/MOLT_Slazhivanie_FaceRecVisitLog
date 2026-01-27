@@ -6,10 +6,35 @@ import uuid
 import time
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
 from app.core.logger import get_logger
 
 logger = get_logger(__name__)
+
+# Auth constants
+AUTH_COOKIE = "sputnik_auth"
+AUTH_VALUE = "authenticated"
+
+# Paths that don't require auth
+PUBLIC_PATHS = {"/admin/login", "/health", "/api/v1/info"}
+
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware для проверки авторизации на страницах админки.
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+
+        # Check if path requires auth (all /admin/ except /admin/login)
+        if path.startswith("/admin") and path not in PUBLIC_PATHS:
+            auth_cookie = request.cookies.get(AUTH_COOKIE)
+            if auth_cookie != AUTH_VALUE:
+                return RedirectResponse(url="/admin/login", status_code=303)
+
+        return await call_next(request)
 
 
 class TraceIDMiddleware(BaseHTTPMiddleware):

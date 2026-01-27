@@ -16,6 +16,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Request, Query, Form, UploadFile, File, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
+
 from fastapi.templating import Jinja2Templates
 
 from sqlalchemy import select, func
@@ -34,10 +35,44 @@ from app.modules.employees.service import (
 from app.modules.recognition import get_recognition_service
 from app.core.storage import get_storage_manager
 from app.core.tasks import get_task_manager
+from app.core.config import settings
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="app/templates")
+
+# Auth cookie name (same as in middleware)
+AUTH_COOKIE = "sputnik_auth"
+AUTH_VALUE = "authenticated"
+
+
+# ============== Login/Logout ==============
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Login page."""
+    return templates.TemplateResponse("admin/login.html", {"request": request})
+
+
+@router.post("/login", response_class=HTMLResponse)
+async def login(request: Request, password: str = Form(...)):
+    """Process login."""
+    if password == settings.admin_password:
+        response = RedirectResponse(url="/admin/", status_code=303)
+        response.set_cookie(AUTH_COOKIE, AUTH_VALUE, httponly=True, max_age=86400 * 7)
+        return response
+    return templates.TemplateResponse("admin/login.html", {
+        "request": request,
+        "error": "Неверный пароль"
+    })
+
+
+@router.get("/logout")
+async def logout():
+    """Logout and redirect to login page."""
+    response = RedirectResponse(url="/admin/login", status_code=303)
+    response.delete_cookie(AUTH_COOKIE)
+    return response
 
 
 # ============== Dashboard ==============
