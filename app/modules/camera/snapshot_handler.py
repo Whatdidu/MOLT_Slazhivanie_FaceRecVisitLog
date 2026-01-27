@@ -89,7 +89,9 @@ async def process_snapshot(file_path: str):
         logger.error(f"Error processing snapshot {file_path}: {e}", exc_info=True)
     finally:
         # Опционально: удаляем обработанный файл
-        _cleanup_snapshot(file_path)
+        # TODO: включить после отладки
+        # _cleanup_snapshot(file_path)
+        pass
 
 
 def _log_recognition_result(result, file_path: str):
