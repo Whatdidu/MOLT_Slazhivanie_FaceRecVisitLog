@@ -11,6 +11,7 @@ from app.core.logger import get_logger
 from app.modules.recognition import get_recognition_service
 from app.modules.recognition.models import EmployeeEmbedding
 from app.modules.employees.crud import employee_crud
+from app.modules.attendance.service import get_attendance_service
 from app.db import get_session
 
 logger = get_logger(__name__)
@@ -75,13 +76,13 @@ async def process_snapshot(file_path: str):
             # Логируем результат
             _log_recognition_result(result, file_path)
 
-            # TODO: Записать в attendance при match
+            # Записываем в attendance при match
             if result.status == "match" and result.person_id:
-                logger.info(
-                    f"ATTENDANCE: {result.person_name} (ID: {result.person_id}) "
-                    f"detected at {datetime.now().isoformat()}"
+                await _record_attendance(
+                    employee_id=int(result.person_id),
+                    confidence=result.confidence,
+                    trace_id=Path(file_path).stem,
                 )
-                # await _record_attendance(db, result.person_id)
 
     except FileNotFoundError:
         logger.error(f"Snapshot file not found: {file_path}")
@@ -116,6 +117,38 @@ def _log_recognition_result(result, file_path: str):
         logger.info(f"[UNKNOWN] Unknown person in {filename}")
     else:
         logger.error(f"[ERROR] {result.error_message} file: {filename}")
+
+
+async def _record_attendance(employee_id: int, confidence: float, trace_id: str):
+    """
+    Записывает посещение в базу данных.
+
+    Args:
+        employee_id: ID сотрудника
+        confidence: Уверенность распознавания
+        trace_id: Уникальный ID для отслеживания (имя файла снапшота)
+    """
+    attendance_service = get_attendance_service()
+
+    # Проверяем анти-спам (не более 1 записи в 5 минут)
+    can_log = await attendance_service.can_log_entry(employee_id)
+
+    if not can_log:
+        logger.debug(f"Skipping attendance log for employee {employee_id} (cooldown)")
+        return
+
+    try:
+        log_entry = await attendance_service.log_entry(
+            employee_id=employee_id,
+            confidence=confidence,
+            trace_id=trace_id,
+        )
+        logger.info(
+            f"ATTENDANCE RECORDED: {log_entry.employee_name} (ID: {employee_id}) "
+            f"at {log_entry.timestamp.isoformat()} [confidence: {confidence:.2%}]"
+        )
+    except Exception as e:
+        logger.error(f"Failed to record attendance for employee {employee_id}: {e}")
 
 
 def _cleanup_snapshot(file_path: str, keep_files: bool = False):
