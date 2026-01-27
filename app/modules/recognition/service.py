@@ -23,9 +23,15 @@ from .exceptions import (
 from .providers.base import BaseFaceProvider
 
 
-# Пороги уверенности
-THRESHOLD_MATCH = 0.55
+# Пороги уверенности (для Euclidean distance: confidence = 1 - distance)
+# distance < 0.4 → confidence > 0.6 → "match"
+# distance 0.4-0.6 → confidence 0.4-0.6 → "low_confidence"
+# distance > 0.6 → confidence < 0.4 → "unknown"
+THRESHOLD_MATCH = 0.60
 THRESHOLD_LOW_CONFIDENCE = 0.40
+
+# Порог евклидова расстояния (стандарт для dlib: 0.6)
+DISTANCE_THRESHOLD = 0.6
 
 
 class RecognitionService:
@@ -126,7 +132,7 @@ class RecognitionService:
             person_id, person_name, similarity = find_best_match(
                 embedding_result.embedding,
                 db_tuples,
-                threshold=THRESHOLD_LOW_CONFIDENCE,
+                threshold=DISTANCE_THRESHOLD,
             )
 
             status = self._determine_status(similarity)
