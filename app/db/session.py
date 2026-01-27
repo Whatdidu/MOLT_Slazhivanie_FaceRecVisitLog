@@ -33,10 +33,18 @@ if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 
-# Создаём асинхронный движок
+# Создаём асинхронный движок с увеличенным пулом соединений
+# pool_size=20 - базовый размер пула
+# max_overflow=30 - дополнительные соединения при пиковой нагрузке
+# pool_timeout=60 - таймаут ожидания соединения
+# pool_recycle=1800 - пересоздание соединений каждые 30 минут
 engine = create_async_engine(
     DATABASE_URL,
     echo=settings.debug,
+    pool_size=20,
+    max_overflow=30,
+    pool_timeout=60,
+    pool_recycle=1800,
 )
 
 # Фабрика сессий

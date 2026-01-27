@@ -3,6 +3,7 @@
 Получает изображение, распознаёт лицо, логирует результат.
 """
 
+import asyncio
 import os
 from datetime import datetime
 from pathlib import Path
@@ -15,6 +16,10 @@ from app.modules.attendance.service import get_attendance_service
 from app.db import get_session
 
 logger = get_logger(__name__)
+
+# Семафор для ограничения параллельной обработки снапшотов
+# Максимум 5 одновременных обработок, чтобы не перегружать БД
+_processing_semaphore = asyncio.Semaphore(5)
 
 
 async def process_snapshot(file_path: str):
@@ -29,6 +34,13 @@ async def process_snapshot(file_path: str):
     Args:
         file_path: Путь к файлу снапшота
     """
+    # Ограничиваем параллельную обработку через семафор
+    async with _processing_semaphore:
+        await _process_snapshot_internal(file_path)
+
+
+async def _process_snapshot_internal(file_path: str):
+    """Внутренняя функция обработки снапшота."""
     logger.info(f"Processing snapshot: {file_path}")
 
     try:
