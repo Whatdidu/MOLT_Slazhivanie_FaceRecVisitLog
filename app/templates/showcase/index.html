@@ -1,0 +1,305 @@
+{% extends "showcase/base.html" %}
+
+{% block title %}Sputnik FaceID{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="nav">
+    <a href="/showcase/" class="nav-logo">Sputnik FaceID</a>
+    <ul class="nav-links">
+        <li><a href="#about">О проекте</a></li>
+        <li><a href="#features">Возможности</a></li>
+        <li><a href="#tech">Технологии</a></li>
+        <li><a href="#team">Команда</a></li>
+        <li><a href="/showcase/cabinet/" class="btn btn-outline" style="padding: 0.5rem 1rem;">Кабинет</a></li>
+    </ul>
+</nav>
+
+<!-- Hero Section -->
+<section style="display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 8rem;">
+    <div class="container">
+        <div data-aos="fade-up">
+            <h1>
+                <span class="gradient-text">Sputnik FaceID</span>
+            </h1>
+            <p style="font-size: 1.5rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem;">
+                Система распознавания лиц для автоматического учёта посещений офиса
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="#about" class="btn btn-primary">
+                    <i class="bi bi-arrow-down"></i> Узнать больше
+                </a>
+                <a href="/showcase/cabinet/" class="btn btn-outline">
+                    <i class="bi bi-box-arrow-up-right"></i> Открыть кабинет
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about">
+    <div class="container">
+        <div class="grid grid-2" style="align-items: center; gap: 4rem;">
+            <div data-aos="fade-right">
+                <h2>О проекте</h2>
+                <p class="text-muted" style="font-size: 1.125rem; margin-bottom: 1.5rem;">
+                    Sputnik FaceID — это система автоматического учёта посещений офиса на основе распознавания лиц.
+                    Камера фиксирует сотрудников при входе и выходе, система распознаёт их и ведёт журнал посещений.
+                </p>
+                <p class="text-muted" style="font-size: 1.125rem;">
+                    Проект разработан командой из 4 человек в рамках учебного курса.
+                    Каждый участник отвечал за свой модуль системы.
+                </p>
+            </div>
+            <div data-aos="fade-left">
+                <div class="stats" style="justify-content: center;">
+                    <div class="stat">
+                        <div class="stat-value">4</div>
+                        <div class="stat-label">разработчика</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">модулей</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">1</div>
+                        <div class="stat-label">камера</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" style="background: var(--dark-lighter);">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+            <h2>Возможности системы</h2>
+            <p class="text-muted">Что умеет Sputnik FaceID</p>
+        </div>
+
+        <div class="grid grid-3">
+            <div class="card" data-aos="fade-up" data-aos-delay="0">
+                <div class="feature-icon">
+                    <i class="bi bi-person-bounding-box"></i>
+                </div>
+                <h3>Распознавание лиц</h3>
+                <p class="text-muted">
+                    Автоматическое определение сотрудников по лицу с использованием нейросетей dlib
+                </p>
+            </div>
+
+            <div class="card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="bi bi-camera-video"></i>
+                </div>
+                <h3>Интеграция с камерой</h3>
+                <p class="text-muted">
+                    Камера отправляет снимки по FTP при детекции движения, система обрабатывает их в реальном времени
+                </p>
+            </div>
+
+            <div class="card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="bi bi-journal-check"></i>
+                </div>
+                <h3>Журнал посещений</h3>
+                <p class="text-muted">
+                    Автоматическая фиксация времени прихода и ухода каждого сотрудника
+                </p>
+            </div>
+
+            <div class="card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h3>Управление сотрудниками</h3>
+                <p class="text-muted">
+                    Добавление новых сотрудников с фото, редактирование данных, просмотр статуса
+                </p>
+            </div>
+
+            <div class="card" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <h3>Отчёты и аналитика</h3>
+                <p class="text-muted">
+                    Статистика посещений, отчёты по сотрудникам, экспорт данных
+                </p>
+            </div>
+
+            <div class="card" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h3>Веб-админка</h3>
+                <p class="text-muted">
+                    Удобный интерфейс для управления системой, защищённый паролем
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tech Stack Section -->
+<section id="tech">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+            <h2>Технологии</h2>
+            <p class="text-muted">Стек технологий проекта</p>
+        </div>
+
+        <div class="grid grid-2" style="gap: 3rem;">
+            <div class="card" data-aos="fade-right">
+                <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-server" style="color: var(--primary);"></i> Backend</h3>
+                <div class="tech-stack">
+                    <span class="tech-badge">Python 3.11</span>
+                    <span class="tech-badge">FastAPI</span>
+                    <span class="tech-badge">SQLAlchemy</span>
+                    <span class="tech-badge">PostgreSQL</span>
+                    <span class="tech-badge">Alembic</span>
+                    <span class="tech-badge">Pydantic</span>
+                </div>
+            </div>
+
+            <div class="card" data-aos="fade-left">
+                <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-cpu" style="color: var(--secondary);"></i> ML & Recognition</h3>
+                <div class="tech-stack">
+                    <span class="tech-badge">dlib</span>
+                    <span class="tech-badge">face_recognition</span>
+                    <span class="tech-badge">NumPy</span>
+                    <span class="tech-badge">Pillow</span>
+                </div>
+            </div>
+
+            <div class="card" data-aos="fade-right">
+                <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-window" style="color: var(--accent);"></i> Frontend</h3>
+                <div class="tech-stack">
+                    <span class="tech-badge">Jinja2</span>
+                    <span class="tech-badge">Bootstrap 5</span>
+                    <span class="tech-badge">JavaScript</span>
+                    <span class="tech-badge">HTML/CSS</span>
+                </div>
+            </div>
+
+            <div class="card" data-aos="fade-left">
+                <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-box-seam" style="color: var(--primary);"></i> Infrastructure</h3>
+                <div class="tech-stack">
+                    <span class="tech-badge">Docker</span>
+                    <span class="tech-badge">Docker Compose</span>
+                    <span class="tech-badge">Yandex Cloud</span>
+                    <span class="tech-badge">FTP Server</span>
+                    <span class="tech-badge">GitHub Actions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section id="team" style="background: var(--dark-lighter);">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+            <h2>Команда</h2>
+            <p class="text-muted">Кто какой модуль разрабатывал</p>
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            <div class="card team-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h3>Мансур Хайруллин</h3>
+                <div class="role">Архитектор, ML-лид</div>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Recognition — модуль распознавания лиц, ML-пайплайн, архитектура проекта
+                </p>
+            </div>
+
+            <div class="card team-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h3>Лиля Фатхуллина</h3>
+                <div class="role">Frontend, Бизнес-логика</div>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Attendance — журнал посещений, Admin UI — веб-админка
+                </p>
+            </div>
+
+            <div class="card team-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h3>Ольга</h3>
+                <div class="role">Backend, База данных</div>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Database — модели и миграции, Employees — API управления сотрудниками
+                </p>
+            </div>
+
+            <div class="card team-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h3>Татьяна</h3>
+                <div class="role">DevOps, Интеграция</div>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Infrastructure — FastAPI, Docker, деплой, Gateway API
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Video Section -->
+<section id="video">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+            <h2>Видео о проекте</h2>
+            <p class="text-muted">Каждый участник рассказывает о своей части работы</p>
+        </div>
+
+        <div data-aos="fade-up" style="max-width: 900px; margin: 0 auto;">
+            <div class="video-container">
+                <!-- Заглушка для видео - заменить на iframe RuTube -->
+                <div class="video-placeholder" id="video-placeholder">
+                    <i class="bi bi-play-circle"></i>
+                    <p>Видео будет добавлено</p>
+                    <p style="font-size: 0.875rem;">Ссылка на RuTube</p>
+                </div>
+                <!--
+                Для вставки видео RuTube раскомментировать и заменить VIDEO_ID:
+                <iframe src="https://rutube.ru/play/embed/VIDEO_ID"
+                        frameBorder="0" allow="clipboard-write; autoplay"
+                        webkitAllowFullScreen mozallowfullscreen allowFullScreen>
+                </iframe>
+                -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="text-align: center; min-height: auto; padding: 6rem 2rem;">
+    <div class="container" data-aos="fade-up">
+        <h2>Посмотреть систему в действии</h2>
+        <p class="text-muted" style="margin-bottom: 2rem;">
+            Перейдите в кабинет, чтобы увидеть интерфейс и попробовать систему
+        </p>
+        <a href="/showcase/cabinet/" class="btn btn-primary btn-lg">
+            <i class="bi bi-box-arrow-up-right"></i> Открыть кабинет
+        </a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer style="background: var(--dark-lighter); padding: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p class="text-muted" style="margin: 0;">
+        Sputnik FaceID &copy; 2025 — Учебный проект
+    </p>
+</footer>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "showcase/base.html" %}
+
+{% block title %}Кабинет — Sputnik FaceID{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="nav">
+    <a href="/showcase/" class="nav-logo">Sputnik FaceID</a>
+    <ul class="nav-links">
+        <li><a href="/showcase/#about">О проекте</a></li>
+        <li><a href="/showcase/#team">Команда</a></li>
+        <li><a href="#screenshots">Скриншоты</a></li>
+        <li><a href="#access" class="btn btn-outline" style="padding: 0.5rem 1rem;">Доступ</a></li>
+    </ul>
+</nav>
+
+<!-- Header -->
+<section style="min-height: auto; padding-top: 8rem; padding-bottom: 4rem; text-align: center;">
+    <div class="container">
+        <a href="/showcase/" class="back-link" data-aos="fade-right">
+            <i class="bi bi-arrow-left"></i> Назад к презентации
+        </a>
+        <div data-aos="fade-up">
+            <h1><span class="gradient-text">Кабинет системы</span></h1>
+            <p class="text-muted" style="font-size: 1.25rem; max-width: 700px; margin: 0 auto;">
+                Интерфейс администратора Sputnik FaceID
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Screenshots Section -->
+<section id="screenshots" style="background: var(--dark-lighter); padding-top: 4rem;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+            <h2>Скриншоты интерфейса</h2>
+            <p class="text-muted">Основные разделы веб-админки</p>
+        </div>
+
+        <div class="grid grid-2" style="gap: 2rem;">
+            <!-- Dashboard -->
+            <div class="card" data-aos="fade-up" data-aos-delay="0" style="padding: 1rem;">
+                <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem;">
+                    <img src="/static/showcase/photos/fashboard.png" alt="Dashboard"
+                         style="width: 100%; height: auto; display: block;">
+                </div>
+                <h3 style="margin-bottom: 0.5rem;">Dashboard</h3>
+                <p class="text-muted" style="font-size: 0.9rem; margin: 0;">
+                    Главная панель со статистикой: кто сейчас в офисе, последние события, общая сводка
+                </p>
+            </div>
+
+            <!-- Employees -->
+            <div class="card" data-aos="fade-up" data-aos-delay="100" style="padding: 1rem;">
+                <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem;">
+                    <img src="/static/showcase/photos/emploee.png" alt="Сотрудники"
+                         style="width: 100%; height: auto; display: block;">
+                </div>
+                <h3 style="margin-bottom: 0.5rem;">Сотрудники</h3>
+                <p class="text-muted" style="font-size: 0.9rem; margin: 0;">
+                    Список сотрудников с фото, статусом эмбеддинга и возможностью редактирования
+                </p>
+            </div>
+
+            <!-- Reports -->
+            <div class="card" data-aos="fade-up" data-aos-delay="200" style="padding: 1rem;">
+                <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem;">
+                    <img src="/static/showcase/photos/result.png" alt="Отчёты"
+                         style="width: 100%; height: auto; display: block;">
+                </div>
+                <h3 style="margin-bottom: 0.5rem;">Отчёты</h3>
+                <p class="text-muted" style="font-size: 0.9rem; margin: 0;">
+                    Детальные отчёты по посещениям, фильтрация по датам и сотрудникам
+                </p>
+            </div>
+
+            <!-- FTP/FileBrowser -->
+            <div class="card" data-aos="fade-up" data-aos-delay="300" style="padding: 1rem;">
+                <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem;">
+                    <img src="/static/showcase/photos/ftp.png" alt="FileBrowser"
+                         style="width: 100%; height: auto; display: block;">
+                </div>
+                <h3 style="margin-bottom: 0.5rem;">FileBrowser</h3>
+                <p class="text-muted" style="font-size: 0.9rem; margin: 0;">
+                    Веб-интерфейс для просмотра снимков с камеры и управления файлами
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Status Section -->
+<section style="padding-top: 4rem; padding-bottom: 4rem;">
+    <div class="container">
+        <div class="card" data-aos="fade-up" style="max-width: 800px; margin: 0 auto; border-left: 4px solid var(--secondary);">
+            <div style="display: flex; align-items: flex-start; gap: 1.5rem;">
+                <div style="font-size: 2.5rem; color: var(--secondary);">
+                    <i class="bi bi-gear-wide-connected"></i>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 1rem;">Статус: настройка системы</h3>
+                    <p class="text-muted" style="margin-bottom: 1rem;">
+                        Сервис находится в режиме настройки и калибровки. Идёт подбор оптимальных порогов распознавания
+                        для достижения баланса между точностью и количеством ложных срабатываний.
+                    </p>
+                    <ul class="text-muted" style="margin: 0; padding-left: 1.25rem;">
+                        <li style="margin-bottom: 0.5rem;">
+                            <strong>Распознанные фото</strong> сохраняются в соответствующую папку для проверки корректности
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <strong>Фото без людей</strong> автоматически удаляются
+                        </li>
+                        <li>
+                            <strong>Фото unknown</strong> (нераспознанные) также сохраняются для анализа
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Access Section -->
+<section id="access" style="background: var(--dark-lighter); padding-top: 4rem; padding-bottom: 4rem;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+            <h2>Доступ к системе</h2>
+            <p class="text-muted">Войдите в кабинет, чтобы посмотреть систему</p>
+        </div>
+
+        <div class="grid grid-2" style="max-width: 800px; margin: 0 auto; gap: 2rem;">
+            <!-- FaceID Admin -->
+            <div class="card" data-aos="fade-up" data-aos-delay="0" style="text-align: center;">
+                <div style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;">
+                    <i class="bi bi-person-bounding-box"></i>
+                </div>
+                <h3>Sputnik FaceID</h3>
+                <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Основная админка системы распознавания
+                </p>
+                <div style="background: var(--dark); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem; color: var(--text-muted);">Пароль:</p>
+                    <code style="font-size: 1.25rem; color: var(--accent);">molt</code>
+                </div>
+                <a href="http://158.160.62.149:8000/admin/" target="_blank" class="btn btn-primary" style="width: 100%;">
+                    <i class="bi bi-box-arrow-up-right"></i> Открыть кабинет
+                </a>
+            </div>
+
+            <!-- FileBrowser -->
+            <div class="card" data-aos="fade-up" data-aos-delay="100" style="text-align: center;">
+                <div style="font-size: 3rem; color: var(--secondary); margin-bottom: 1rem;">
+                    <i class="bi bi-folder2-open"></i>
+                </div>
+                <h3>FileBrowser</h3>
+                <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Просмотр снимков с камеры и файлов
+                </p>
+                <div style="background: var(--dark); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-muted);">
+                        Доступ по запросу
+                    </p>
+                </div>
+                <a href="http://158.160.62.149:8080/" target="_blank" class="btn btn-outline" style="width: 100%;">
+                    <i class="bi bi-box-arrow-up-right"></i> Открыть FileBrowser
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer style="padding: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p class="text-muted" style="margin: 0;">
+        <a href="/showcase/" style="color: var(--primary); text-decoration: none;">
+            <i class="bi bi-arrow-left"></i> Вернуться к презентации
+        </a>
+    </p>
+</footer>
+{% endblock %}
