@@ -8,9 +8,9 @@
     <a href="/showcase/" class="nav-logo">Sputnik FaceID</a>
     <ul class="nav-links">
         <li><a href="#about">О проекте</a></li>
+        <li><a href="#team">Команда</a></li>
         <li><a href="#features">Возможности</a></li>
         <li><a href="#tech">Технологии</a></li>
-        <li><a href="#team">Команда</a></li>
         <li><a href="/showcase/cabinet/" class="btn btn-outline" style="padding: 0.5rem 1rem;">Кабинет</a></li>
     </ul>
 </nav>
@@ -26,11 +26,11 @@
                 Система распознавания лиц для автоматического учёта посещений офиса
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="/admin/" class="btn btn-primary">
-                    <i class="bi bi-box-arrow-up-right"></i> Перейти в кабинет
-                </a>
-                <a href="/showcase/cabinet/" class="btn btn-outline">
+                <a href="/showcase/cabinet/" class="btn btn-primary">
                     <i class="bi bi-info-circle"></i> О кабинете FaceID
+                </a>
+                <a href="/admin/" class="btn btn-outline">
+                    <i class="bi bi-box-arrow-up-right"></i> Перейти в кабинет
                 </a>
             </div>
         </div>
@@ -67,6 +67,61 @@
                         <div class="stat-label">камера</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section id="team" style="background: var(--dark-lighter);">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+            <h2>Команда</h2>
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            <div class="card team-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="avatar">
+                    <img src="/static/employee_photos/mansur.png" alt="Мансур Хайруллин">
+                </div>
+                <h3>Мансур Хайруллин</h3>
+                <div class="role">Архитектор, ML-лид</div>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Recognition — модуль распознавания лиц, ML-пайплайн, архитектура проекта
+                </p>
+            </div>
+
+            <div class="card team-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="avatar">
+                    <img src="/static/employee_photos/liliya.jpg" alt="Лиля Афанасьева">
+                </div>
+                <h3>Лиля Афанасьева</h3>
+                <div class="role">Frontend, Бизнес-логика</div>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Attendance — журнал посещений, Admin UI — веб-админка
+                </p>
+            </div>
+
+            <div class="card team-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="avatar">
+                    <img src="/static/employee_photos/Olga.png" alt="Ольга Идиатуллина">
+                </div>
+                <h3>Ольга Идиатуллина</h3>
+                <div class="role">Backend, База данных</div>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Database — модели и миграции, Employees — API управления сотрудниками
+                </p>
+            </div>
+
+            <div class="card team-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="avatar">
+                    <img src="/static/employee_photos/tatyana.jpg" alt="Татьяна Кондушова">
+                </div>
+                <h3>Татьяна Кондушова</h3>
+                <div class="role">DevOps, Интеграция</div>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    Infrastructure — FastAPI, Docker, деплой, Gateway API
+                </p>
             </div>
         </div>
     </div>
@@ -194,61 +249,6 @@
                     <span class="tech-badge">FTP Server</span>
                     <span class="tech-badge">GitHub Actions</span>
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Team Section -->
-<section id="team" style="background: var(--dark-lighter);">
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
-            <h2>Команда</h2>
-        </div>
-
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-            <div class="card team-card" data-aos="fade-up" data-aos-delay="0">
-                <div class="avatar">
-                    <img src="/static/employee_photos/mansur.png" alt="Мансур Хайруллин">
-                </div>
-                <h3>Мансур Хайруллин</h3>
-                <div class="role">Архитектор, ML-лид</div>
-                <p class="text-muted" style="font-size: 0.9rem;">
-                    Recognition — модуль распознавания лиц, ML-пайплайн, архитектура проекта
-                </p>
-            </div>
-
-            <div class="card team-card" data-aos="fade-up" data-aos-delay="100">
-                <div class="avatar">
-                    <img src="/static/employee_photos/liliya.jpg" alt="Лиля Афанасьева">
-                </div>
-                <h3>Лиля Афанасьева</h3>
-                <div class="role">Frontend, Бизнес-логика</div>
-                <p class="text-muted" style="font-size: 0.9rem;">
-                    Attendance — журнал посещений, Admin UI — веб-админка
-                </p>
-            </div>
-
-            <div class="card team-card" data-aos="fade-up" data-aos-delay="200">
-                <div class="avatar">
-                    <img src="/static/employee_photos/Olga.png" alt="Ольга Идиатуллина">
-                </div>
-                <h3>Ольга Идиатуллина</h3>
-                <div class="role">Backend, База данных</div>
-                <p class="text-muted" style="font-size: 0.9rem;">
-                    Database — модели и миграции, Employees — API управления сотрудниками
-                </p>
-            </div>
-
-            <div class="card team-card" data-aos="fade-up" data-aos-delay="300">
-                <div class="avatar">
-                    <img src="/static/employee_photos/tatyana.jpg" alt="Татьяна Кондушова">
-                </div>
-                <h3>Татьяна Кондушова</h3>
-                <div class="role">DevOps, Интеграция</div>
-                <p class="text-muted" style="font-size: 0.9rem;">
-                    Infrastructure — FastAPI, Docker, деплой, Gateway API
-                </p>
             </div>
         </div>
     </div>
