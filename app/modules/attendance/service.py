@@ -219,33 +219,47 @@ class AttendanceService:
 
     async def get_present_employees(self) -> list[EmployeeStatusResponse]:
         """
-        Получить список сотрудников, находящихся в офисе.
+        Получить список сотрудников, находящихся в офисе сегодня.
+
+        Логика:
+        - Считаются только записи за сегодня
+        - Каждый новый день - новый рабочий день (exit не обязателен)
+        - Показывается ПЕРВЫЙ вход за день
+        - Каждый сотрудник отображается только один раз
 
         Returns:
             Список сотрудников со статусом IN_OFFICE
         """
         async with get_session() as session:
-            # Подзапрос: последняя запись для каждого сотрудника
+            # Начало сегодняшнего дня
+            today_start = datetime.combine(date.today(), datetime.min.time())
+
+            # Подзапрос: ПЕРВЫЙ вход для каждого сотрудника СЕГОДНЯ
             subquery = (
                 select(
                     AttendanceLog.employee_id,
-                    func.max(AttendanceLog.timestamp).label("max_timestamp")
+                    func.min(AttendanceLog.timestamp).label("first_entry_timestamp")
+                )
+                .where(
+                    and_(
+                        AttendanceLog.timestamp >= today_start,
+                        AttendanceLog.event_type == DBEventType.ENTRY,
+                    )
                 )
                 .group_by(AttendanceLog.employee_id)
                 .subquery()
             )
 
-            # Получаем последние записи с типом ENTRY
+            # Получаем первые записи входа за сегодня
             result = await session.execute(
                 select(AttendanceLog)
                 .join(
                     subquery,
                     and_(
                         AttendanceLog.employee_id == subquery.c.employee_id,
-                        AttendanceLog.timestamp == subquery.c.max_timestamp,
+                        AttendanceLog.timestamp == subquery.c.first_entry_timestamp,
                     )
                 )
-                .where(AttendanceLog.event_type == DBEventType.ENTRY)
             )
 
             logs = result.scalars().all()
