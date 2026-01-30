@@ -337,6 +337,62 @@
             opacity: 0.5;
         }
 
+        /* YouTube Shorts grid */
+        .shorts-grid {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .shorts-item {
+            width: 220px;
+            aspect-ratio: 9/16;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--dark-lighter);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+
+        .shorts-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .shorts-item iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @media (max-width: 992px) {
+            .shorts-item {
+                width: 180px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .shorts-grid {
+                gap: 1rem;
+            }
+            .shorts-item {
+                width: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .shorts-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+            .shorts-item {
+                width: 100%;
+                max-width: 280px;
+            }
+        }
+
         /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
