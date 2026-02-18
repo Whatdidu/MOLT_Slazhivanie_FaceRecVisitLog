@@ -40,7 +40,7 @@
         <div class="grid grid-2" style="gap: 2rem;">
             <!-- Dashboard -->
             <div class="card" data-aos="fade-up" data-aos-delay="0" style="padding: 1rem;">
-                <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem;">
+                <div class="screenshot-wrap" style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem; cursor: pointer;" onclick="toggleScreenshot(this)">
                     <img src="/static/showcase/photos/fashboard.png" alt="Dashboard"
                          style="width: 100%; height: auto; display: block;">
                 </div>
@@ -52,7 +52,7 @@
 
             <!-- Employees -->
             <div class="card" data-aos="fade-up" data-aos-delay="100" style="padding: 1rem;">
-                <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem;">
+                <div class="screenshot-wrap" style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem; cursor: pointer;" onclick="toggleScreenshot(this)">
                     <img src="/static/showcase/photos/emploee.png" alt="Сотрудники"
                          style="width: 100%; height: auto; display: block;">
                 </div>
@@ -64,7 +64,7 @@
 
             <!-- Reports -->
             <div class="card" data-aos="fade-up" data-aos-delay="200" style="padding: 1rem;">
-                <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem;">
+                <div class="screenshot-wrap" style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem; cursor: pointer;" onclick="toggleScreenshot(this)">
                     <img src="/static/showcase/photos/result.png" alt="Отчёты"
                          style="width: 100%; height: auto; display: block;">
                 </div>
@@ -76,7 +76,7 @@
 
             <!-- FTP/FileBrowser -->
             <div class="card" data-aos="fade-up" data-aos-delay="300" style="padding: 1rem;">
-                <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem;">
+                <div class="screenshot-wrap" style="border-radius: 12px; overflow: hidden; margin-bottom: 1rem; cursor: pointer;" onclick="toggleScreenshot(this)">
                     <img src="/static/showcase/photos/ftp.png" alt="FileBrowser"
                          style="width: 100%; height: auto; display: block;">
                 </div>
@@ -177,4 +177,44 @@
         </a>
     </p>
 </footer>
+
+<!-- Lightbox overlay -->
+<div id="lightbox" onclick="closeLightbox()" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+">
+    <img id="lightbox-img" src="" alt="" style="
+        max-width: 95%;
+        max-height: 95vh;
+        border-radius: 12px;
+        box-shadow: 0 0 60px rgba(99,102,241,0.3);
+    ">
+</div>
+
+<script>
+function toggleScreenshot(wrap) {
+    var img = wrap.querySelector('img');
+    var lb = document.getElementById('lightbox');
+    var lbImg = document.getElementById('lightbox-img');
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.style.display = 'flex';
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+});
+</script>
 {% endblock %}
